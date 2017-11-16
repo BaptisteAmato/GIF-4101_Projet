@@ -18,3 +18,4 @@ Password: 3O55f:
 
 ### Links of interest:
 https://stanfordmlgroup.github.io/projects/chexnet/
+https://arxiv.org/pdf/1705.09759.pdf
