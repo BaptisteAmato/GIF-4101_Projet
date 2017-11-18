@@ -181,6 +181,15 @@ Les principes de segmentation d'image sont clairement expliqués dans l'article
 \textbf{Fully Convolutional Networks for Semantic Segmentation}, par \textbf{Shelhamer
 \textit{et al.}}.
 
+\section{Premières réflexions}
+
+Les images du jeu de données qui nous a été donné ne sont pas de taille constante ;
+certaines sont étirées verticalement, d'autres horizontalement, avec une assez
+grande variabilité de résolutions. Simplement redimmensionner les images en entrée
+amènerait du bruit et donc rendrait la tâche de détection de contour plus complexe.
+Une approche mentionnée dans le dernier article cité nous permettrait de palier
+à ce problème.
+
 
 
 \end{document}
