@@ -22,3 +22,6 @@ https://arxiv.org/pdf/1705.09759.pdf
 https://arxiv.org/pdf/1511.00561.pdf
 https://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Yang_Object_Contour_Detection_CVPR_2016_paper.pdf
 https://arxiv.org/pdf/1711.04340.pdf
+
+### Caffe installation
+https://gist.github.com/arundasan91/b432cb011d1c45b65222d0fac5f9232c
