@@ -19,3 +19,6 @@ Password: 3O55f:
 ### Links of interest:
 https://stanfordmlgroup.github.io/projects/chexnet/
 https://arxiv.org/pdf/1705.09759.pdf
+https://arxiv.org/pdf/1511.00561.pdf
+https://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Yang_Object_Contour_Detection_CVPR_2016_paper.pdf
+https://arxiv.org/pdf/1711.04340.pdf
