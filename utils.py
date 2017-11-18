@@ -4,6 +4,7 @@ import cv2
 import skimage.external.tifffile as tifffile
 import matplotlib.pyplot as plt
 import skimage.color as color
+import skimage.transform as transform
 
 
 main_folder_path = '/media/maewanto/B498-74ED/Data_projet_apprentissage'
@@ -11,7 +12,11 @@ main_folder_path = '/media/maewanto/B498-74ED/Data_projet_apprentissage'
 
 
 def split_tif_image(image):
-    return image[0], image[1], image[2]
+        return image[0], image[1], image[2]
+
+
+def resize_image(image, width=1024, height=1024):
+    return transform.resize(image, (width, height))
 
 
 def get_mirrored_images(actin, axon, dendrite, horizontal=True):
