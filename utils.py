@@ -37,7 +37,7 @@ def image_enhancement(image, kernel_erode=2):
     return image
 
 
-def get_colored_images(actin, axon, dendrite, thresh=3):
+def get_colored_images(actin, axon, dendrite, thresh=5):
     """
     Returns the three colored images, plus the merged image (three channels superposed)
     """
@@ -96,30 +96,32 @@ def get_files_path(main_folder_path):
                 yield os.path.join(subdir, file)
 
 
-def display_tif_image(file_path, with_merged_image=True):
+def display_tif_image(file_path, with_colored_images=True, with_merged_image=True):
     image = tifffile.imread(file_path)
     actin, axon, dendrite = split_tif_image(image)
     print("Image imported: " + file_path)
-    plt.subplot(2, 3, 1)
+    # If with_colored_images == False, subplots on one line only.
+    plt.subplot(1 + with_colored_images, 3, 1)
     plt.title("Actin")
     plt.imshow(actin)
-    plt.subplot(2, 3, 2)
+    plt.subplot(1 + with_colored_images, 3, 2)
     plt.title("Axon")
     plt.imshow(axon)
-    plt.subplot(2, 3, 3)
+    plt.subplot(1 + with_colored_images, 3, 3)
     plt.title("Dendrite")
     plt.imshow(dendrite)
 
     merged, actin, axon, dendrite = get_colored_images(actin, axon, dendrite)
-    plt.subplot(2, 3, 4)
-    plt.title("Actin colored")
-    plt.imshow(actin)
-    plt.subplot(2, 3, 5)
-    plt.title("Axon colored")
-    plt.imshow(axon)
-    plt.subplot(2, 3, 6)
-    plt.title("Dendrite colored")
-    plt.imshow(dendrite)
+    if with_colored_images:
+        plt.subplot(2, 3, 4)
+        plt.title("Actin colored")
+        plt.imshow(actin)
+        plt.subplot(2, 3, 5)
+        plt.title("Axon colored")
+        plt.imshow(axon)
+        plt.subplot(2, 3, 6)
+        plt.title("Dendrite colored")
+        plt.imshow(dendrite)
     # Show full screen.
     mng = plt.get_current_fig_manager()
     mng.resize(*mng.window.maxsize())
@@ -131,7 +133,7 @@ def display_tif_image(file_path, with_merged_image=True):
 
 def display_images_one_by_one():
     for file_path in get_files_path(main_folder_path):
-        display_tif_image(file_path, False)
+        display_tif_image(file_path, True, False)
 
 
 display_images_one_by_one()
