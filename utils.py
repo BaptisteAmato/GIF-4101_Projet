@@ -37,6 +37,7 @@ def image_enhancement(image, kernel_erode=2):
     return image
 
 
+# TODO: add gaussian blur.
 def get_colored_images(actin, axon, dendrite, thresh=5):
     """
     Returns the three colored images, plus the merged image (three channels superposed)
