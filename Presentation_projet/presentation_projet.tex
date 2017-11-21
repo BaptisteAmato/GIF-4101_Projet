@@ -106,38 +106,38 @@
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
 
 \begin{center}
-\vspace{2.5cm}
-\presentation{Université LAVAL}
+ \vspace{2.5cm}
+ \presentation{Université LAVAL}
 
-%-------------------------------------------------------------------------------
-% TITLE SECTION
-%-------------------------------------------------------------------------------
+ %-------------------------------------------------------------------------------
+ % TITLE SECTION
+ %-------------------------------------------------------------------------------
 
-\vspace{4cm}
-\noindent{
-\begin{minipage}{0.9\textwidth}
-\begin{center}
-  \HRule \\[0.4cm]
-  { \huge \bfseries Apprentissage et reconnaissance \\ GIF-4101/GIF-7005}\\[0.4cm] % Title of the document
-  { Projet : Détection automatique de prolongements neuronaux }\\ % Sub-Title of the document
-  \HRule \\[1.5cm]
-\end{center}
-\end{minipage}}
-\vspace{4cm}
+ \vspace{4cm}
+ \noindent{
+  \begin{minipage}{0.9\textwidth}
+   \begin{center}
+    \HRule \\[0.4cm]
+    { \huge \bfseries Apprentissage et reconnaissance \\ GIF-4101/GIF-7005}\\[0.4cm] % Title of the document
+    { Projet : Détection automatique de prolongements neuronaux }\\ % Sub-Title of the document
+    \HRule \\[1.5cm]
+   \end{center}
+  \end{minipage}}
+ \vspace{4cm}
 
 
-%-------------------------------------------------------------------------------
-% AUTHOR SECTION
-%-------------------------------------------------------------------------------
+ %-------------------------------------------------------------------------------
+ % AUTHOR SECTION
+ %-------------------------------------------------------------------------------
 
-\begin{minipage}{0.4\textwidth}
-\begin{flushleft} \large
-\emph{Auteurs :}\\
-Baptiste \textsc{Amato} \\
-Alexandre \textsc{Chavenon} \\
-Arnoud \textsc{Vanhuele} \\
-\end{flushleft}
-\end{minipage}
+ \begin{minipage}{0.4\textwidth}
+  \begin{flushleft} \large
+   \emph{Auteurs :}\\
+   Baptiste \textsc{Amato} \\
+   Alexandre \textsc{Chavenon} \\
+   Arnoud \textsc{Vanhuele} \\
+  \end{flushleft}
+ \end{minipage}
 
 \end{center}
 
@@ -147,7 +147,10 @@ Arnoud \textsc{Vanhuele} \\
 
 \section{Présentation du projet}
 
-Le projet est proposé par le centre de recherche CERVO.  Il consiste à reconnaître des axones et des dendrites sur des images d’une protéine, en étiquetant ces images n’ayant pas de marqueurs axonaux et dendritiques. Nous disposons d’une banque de données d’images déjà marquées, c’est donc un problème d’apprentissage supervisé et d’ailleurs le sujet nous invite à réfléchir sur une solution par un réseau de neurones.  
+Le projet est proposé par le centre de recherche CERVO.  Il consiste à reconnaître
+des axones et des dendrites sur des images d’une protéine (actine), en étiquetant ces images
+n’ayant pas de marqueurs axonaux et dendritiques. Nous disposons d’une banque de
+données d’images déjà marquées : il s'agit donc un problème d’apprentissage supervisé.
 
 \section{Jeu de données}
 
@@ -166,20 +169,24 @@ car il n'est pas possible d'encadrer les objets par des "bounding boxes", utilis
 par exemple pour la détection de visage, de personnes ou de voitures ; on cherche
 alors à détecter le contour des objets. Un article de recherche assez récent a
 démontré une capacité de détection de contour impressionnante : \textit{Object Contour
-Detection with a Fully Convolutional Encoder-Decoder Network}, par \textbf{Yang
-\textit{et al.}}. Nous pensons donc nous orienter vers un réseau de neurones profond
+ Detection with a Fully Convolutional Encoder-Decoder Network}, par \textbf{Yang
+ \textit{et al.}}. Nous pensons donc nous orienter vers un réseau de neurones profond
 avec une architecture \textit{Encoder-Decoder} ; cette architecture est aussi
 utilisé dans les traductions de textes (séquences en entrée et sortie). Des résultats
 probants concernant de la segmentation d'images sont présentés dans l'article
 \textit{Iterative Deep Convolutional Encoder-Decoder Network for Medical Image
-Segmentation}, par \textbf{Jung Uk Kim, Hak Gu Kim, et Yong Man Ro}, suivant une
+ Segmentation}, par \textbf{Jung Uk Kim, Hak Gu Kim, et Yong Man Ro}, suivant une
 architecture similaire (\textit{Encoder-Decoder}). \\
 Les principes de segmentation d'image sont clairement expliqués dans l'article
 \textbf{Fully Convolutional Networks for Semantic Segmentation}, par \textbf{Shelhamer
-\textit{et al.}}.
-
-Concernant l’augmentation de notre jeu de données, nous aurons une approche plus classique par du traitement d’image traditionnelle et dans un second temps, nous explorons la possibilité d'utiliser un Adversarial Network pour l’augmentation des données précisé dans l'article\textit{ Biomedical Data Augmentation Using Generative Adversarial Neural Networks. Artificial Neural Networks and Machine Learning} par \textbf{Calimeri, F.
-\textit{et al.}}.
+ \textit{et al.}}. \\
+Concernant l’augmentation de notre jeu de données, nous aurons une approche
+classique par traitement d’image traditionnel et dans un second temps, nous
+explorerons la possibilité d'utiliser un Generative Adversarial Network pour l’augmentation
+des données, comme précisé dans l'article\textit{Biomedical Data Augmentation Using
+Generative Adversarial Neural Networks. Artificial Neural Networks and Machine
+Learning} par \textbf{Calimeri, F.
+ \textit{et al.}}.
 
 \section{Premières réflexions}
 
