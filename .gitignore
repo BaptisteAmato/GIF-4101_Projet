@@ -8,3 +8,6 @@
 
 # idea
 .idea/*
+
+# paths config file
+config.py

@@ -5,9 +5,12 @@ import skimage.external.tifffile as tifffile
 import matplotlib.pyplot as plt
 import skimage.color as color
 import skimage.transform as transform
+from config import *
 
 
-main_folder_path = '/media/maewanto/B498-74ED/Data_projet_apprentissage'
+folder_images_saving = main_folder_path + '/dataset'
+folder_images_saving_train = folder_images_saving + '/train'
+folder_images_saving_test = folder_images_saving + '/test'
 # Image example: 2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif
 
 
@@ -97,6 +100,27 @@ def get_files_path(main_folder_path):
                 yield os.path.join(subdir, file)
 
 
+def save_train_test_images(n=10):
+    get_files_path_generator = get_files_path(main_folder_path)
+    for i in range(0, n):
+        print(i)
+        file_path = next(get_files_path_generator)
+        image = tifffile.imread(file_path)
+        actin, axon, dendrite = split_tif_image(image)
+        _, actin_colored, axon_colored, dendrite_colored = get_colored_images(actin, axon, dendrite)
+
+        if not os.path.exists(folder_images_saving):
+            os.makedirs(folder_images_saving)
+        if not os.path.exists(folder_images_saving_train):
+            os.makedirs(folder_images_saving_train)
+        if not os.path.exists(folder_images_saving_test):
+            os.makedirs(folder_images_saving_test)
+
+        cv2.imwrite(folder_images_saving_train + "/" + str(i) + '.png', actin_colored)
+        cv2.imwrite(folder_images_saving_test + "/" + str(i) + '_axon.png', axon_colored)
+        cv2.imwrite(folder_images_saving_test + "/" + str(i) + '_dendrite.png', dendrite_colored)
+
+
 def display_tif_image(file_path, with_colored_images=True, with_merged_image=True):
     image = tifffile.imread(file_path)
     actin, axon, dendrite = split_tif_image(image)
@@ -137,7 +161,8 @@ def display_images_one_by_one():
         display_tif_image(file_path, True, False)
 
 
-display_images_one_by_one()
+# display_images_one_by_one()
+save_train_test_images()
 
 # image = tifffile.imread('/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
 # actin, axon, dendrite = split_tif_image(image)
