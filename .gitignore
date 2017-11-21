@@ -11,3 +11,10 @@
 
 # paths config file
 config.py
+
+# notebook
+main.ipynb
+.ipynb_checkpoints/*
+
+# generated data
+dataset/*

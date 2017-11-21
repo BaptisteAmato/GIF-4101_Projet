@@ -9,8 +9,8 @@ from config import *
 
 
 folder_images_saving = main_folder_path + '/dataset'
-folder_images_saving_train = folder_images_saving + '/train'
-folder_images_saving_test = folder_images_saving + '/test'
+folder_images_saving_train_x = folder_images_saving + '/train_x'
+folder_images_saving_train_y = folder_images_saving + '/train_y'
 # Image example: 2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif
 
 
@@ -111,14 +111,14 @@ def save_train_test_images(n=10):
 
         if not os.path.exists(folder_images_saving):
             os.makedirs(folder_images_saving)
-        if not os.path.exists(folder_images_saving_train):
-            os.makedirs(folder_images_saving_train)
-        if not os.path.exists(folder_images_saving_test):
-            os.makedirs(folder_images_saving_test)
+        if not os.path.exists(folder_images_saving_train_x):
+            os.makedirs(folder_images_saving_train_x)
+        if not os.path.exists(folder_images_saving_train_y):
+            os.makedirs(folder_images_saving_train_y)
 
-        cv2.imwrite(folder_images_saving_train + "/" + str(i) + '.png', actin_colored)
-        cv2.imwrite(folder_images_saving_test + "/" + str(i) + '_axon.png', axon_colored)
-        cv2.imwrite(folder_images_saving_test + "/" + str(i) + '_dendrite.png', dendrite_colored)
+        cv2.imwrite(folder_images_saving_train_x + "/" + str(i) + '.png', actin_colored)
+        # cv2.imwrite(folder_images_saving_train_y + "/" + str(i) + '_axon.png', axon_colored)
+        cv2.imwrite(folder_images_saving_train_y + "/" + str(i) + '_dendrite.png', dendrite_colored)
 
 
 def display_tif_image(file_path, with_colored_images=True, with_merged_image=True):
