@@ -147,10 +147,7 @@ Arnoud \textsc{Vanhuele} \\
 
 \section{Présentation du projet}
 
-Le projet est proposé par le centre de recherche CERVO. Il consiste à mettre en
-place un réseau de neurones permettant de reconnaitre des axones et des dendrites
-sur des images d’une protéine, en étiquetant ces images n’ayant pas de marqueurs
-axonaux et dendritiques.
+Le projet est proposé par le centre de recherche CERVO.  Il consiste à reconnaître des axones et des dendrites sur des images d’une protéine, en étiquetant ces images n’ayant pas de marqueurs axonaux et dendritiques. Nous disposons d’une banque de données d’images déjà marquées, c’est donc un problème d’apprentissage supervisé et d’ailleurs le sujet nous invite à réfléchir sur une solution par un réseau de neurones.  
 
 \section{Jeu de données}
 
@@ -168,7 +165,7 @@ Il s'agit ici de détecter différents objets dans une image (axones et dendrite
 car il n'est pas possible d'encadrer les objets par des "bounding boxes", utilisées
 par exemple pour la détection de visage, de personnes ou de voitures ; on cherche
 alors à détecter le contour des objets. Un article de recherche assez récent a
-démontré une capacité de détection de contour impressionnate : \textit{Object Contour
+démontré une capacité de détection de contour impressionnante : \textit{Object Contour
 Detection with a Fully Convolutional Encoder-Decoder Network}, par \textbf{Yang
 \textit{et al.}}. Nous pensons donc nous orienter vers un réseau de neurones profond
 avec une architecture \textit{Encoder-Decoder} ; cette architecture est aussi
@@ -179,6 +176,9 @@ Segmentation}, par \textbf{Jung Uk Kim, Hak Gu Kim, et Yong Man Ro}, suivant une
 architecture similaire (\textit{Encoder-Decoder}). \\
 Les principes de segmentation d'image sont clairement expliqués dans l'article
 \textbf{Fully Convolutional Networks for Semantic Segmentation}, par \textbf{Shelhamer
+\textit{et al.}}.
+
+Concernant l’augmentation de notre jeu de données, nous aurons une approche plus classique par du traitement d’image traditionnelle et dans un second temps, nous explorons la possibilité d'utiliser un Adversarial Network pour l’augmentation des données précisé dans l'article\textit{ Biomedical Data Augmentation Using Generative Adversarial Neural Networks. Artificial Neural Networks and Machine Learning} par \textbf{Calimeri, F.
 \textit{et al.}}.
 
 \section{Premières réflexions}
