@@ -118,7 +118,8 @@ def save_train_test_images(n=10):
 
         cv2.imwrite(folder_images_saving_train_x + "/" + str(i) + '.png', actin_colored)
         # cv2.imwrite(folder_images_saving_train_y + "/" + str(i) + '_axon.png', axon_colored)
-        cv2.imwrite(folder_images_saving_train_y + "/" + str(i) + '_dendrite.png', dendrite_colored)
+        # cv2.imwrite(folder_images_saving_train_y + "/" + str(i) + '_dendrite.png', dendrite_colored)
+        cv2.imwrite(folder_images_saving_train_y + "/" + str(i) + '.png', dendrite_colored)
 
 
 def display_tif_image(file_path, with_colored_images=True, with_merged_image=True):
