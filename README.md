@@ -9,6 +9,9 @@
 ### Objective
 Detect axons and dendrites on an actine image (channel 1)
 
+### TODO
+You need to create a config.py file, and define the main_folder_path in it (path in which are the images)
+
 ### Server
 Folder: "Projet détection axones dendrites"
 Connexion via VPN: https://vpn.ulaval.ca/ 
