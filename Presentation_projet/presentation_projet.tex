@@ -188,15 +188,35 @@ Generative Adversarial Neural Networks. Artificial Neural Networks and Machine
 Learning} par \textbf{Calimeri, F.
  \textit{et al.}}.
 
-\section{Premières réflexions}
+\section{Tâches}
 
-Les images du jeu de données qui nous a été donné ne sont pas de taille constante ;
-certaines sont étirées verticalement, d'autres horizontalement, avec une assez
-grande variabilité de résolutions. Simplement redimmensionner les images en entrée
-amènerait du bruit et donc rendrait la tâche de détection de contour plus complexe.
-Une approche mentionnée dans le dernier article cité nous permettrait de palier
-à ce problème.
+La première chose à faire est d'affiner notre algorithme de masquage des images
+données par CERVO. En effet, nous avons déjà des résultats nous permettant d'avancer
+en parallèle sur l'architecture du réseau de neurones, mais nous souhaitons parfaire
+ces premiers résultats afin d'avoir des images en entrées avec le moins de bruit
+possible.
 
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.3]{"ex_mask"}
+\caption{En haut, un triplet actine-axone-dendrite, et en bas les mêmes images une fois le masque appliqué}
+\end{figure}
+
+L'étape suivante est de créer une \textit{pipeline} afin d'amener les images
+d'origine vers le réseau de neurones, en ayant appliquant les transformations et
+augmentations nécessaires. L'étape de transformation (en particulier le redimmensionnement)
+a déjà été effectué ; nous travaillons sur l'augmentation de données mentionnée
+plus haut. \\
+Concernant le réseau en lui-même, nous avons déjà une architecture sur laquelle travailler.
+Nous utiliserons la librairie \textit{Keras} avec un back-end en \textit{TensorFlow}.
+L'architecture sera celle présentée plus haut, soit un \textbf{Encoder-Decoder}.
+L'encodeur amènera à de très petites images constituée d'un grand nombre de canaux,
+puis le décodeur ramènera à la taille d'origine, avec trois canaux (Rouger Vert Bleu).
+Nous avons commencé des tests avec un encodeur inspiré du réseau \textit{AlexNet} ;
+le décodeur faisant seulement les opérations inverses (les \textit{MaxPooling} étant
+substitués par des \textit{UpSampling}). Selon nos recherches, la fonction de perte
+la plus pertinente à utiliser est \textit{sigmoid\_cross\_entropy\_with\_logits}
+(\url{https://www.tensorflow.org/api\_docs/python/tf/nn/sigmoid\_cross\_entropy\_with\_logits}).
 
 
 \end{document}

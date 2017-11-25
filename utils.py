@@ -40,7 +40,6 @@ def image_enhancement(image, kernel_erode=2):
     return image
 
 
-# TODO: add gaussian blur.
 def get_colored_images(actin, axon, dendrite, thresh=5):
     """
     Returns the three colored images, plus the merged image (three channels superposed)
@@ -162,8 +161,8 @@ def display_images_one_by_one():
         display_tif_image(file_path, True, False)
 
 
-# display_images_one_by_one()
-save_train_test_images(200)
+display_images_one_by_one()
+# save_train_test_images(200)
 
 # image = tifffile.imread('/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
 # actin, axon, dendrite = split_tif_image(image)
