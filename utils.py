@@ -153,24 +153,42 @@ def get_colored_images(actin, axon, dendrite, thresh=5):
     return merged, actin, axon, dendrite
 
 
-def get_contour_map(colored_image):
-    res = np.zeros((colored_image.shape[0], colored_image.shape[1], 1))
-    colored_indexes = np.where(colored_image == 255)
-    res[colored_indexes[0], colored_indexes[1]] = 1
-    return res
+def get_contour_map(actin, axon, dendrite):
+    if actin is not None:
+        colored_indexes = np.where(actin == 255)
+        actin = np.zeros((actin.shape[0], actin.shape[1], 1))
+        actin[colored_indexes[0], colored_indexes[1]] = 1
+
+    if axon is not None:
+        colored_indexes = np.where(axon == 255)
+        axon = np.zeros((axon.shape[0], axon.shape[1], 1))
+        axon[colored_indexes[0], colored_indexes[1]] = 2
+
+    if dendrite is not None:
+        colored_indexes = np.where(dendrite == 255)
+        dendrite = np.zeros((dendrite.shape[0], dendrite.shape[1], 1))
+        dendrite[colored_indexes[0], colored_indexes[1]] = 3
+
+    return actin, axon, dendrite
 
 
-def get_image_from_contour_map(map, color='g'):
-    if color == 'r':
-        channel = 0
-    elif color == 'g':
-        channel = 1
-    else:
-        channel = 2
-    ones = np.where(map == 1)
-    res = np.zeros((map.shape[0], map.shape[1], 3), dtype=np.uint8)
-    res[ones[0], ones[1], channel] = 255
-    return res
+def get_image_from_contour_map(actin, axon, dendrite):
+    if actin is not None:
+        indexes = np.where(actin == 1)
+        actin = np.zeros((actin.shape[0], actin.shape[1], 3), dtype=np.uint8)
+        actin[indexes[0], indexes[1], 1] = 255
+
+    if axon is not None:
+        indexes = np.where(axon == 2)
+        axon = np.zeros((axon.shape[0], axon.shape[1], 3), dtype=np.uint8)
+        axon[indexes[0], indexes[1], 0] = 255
+
+    if dendrite is not None:
+        indexes = np.where(dendrite == 3)
+        dendrite = np.zeros((dendrite.shape[0], dendrite.shape[1], 3), dtype=np.uint8)
+        dendrite[indexes[0], indexes[1], 2] = 255
+
+    return actin, axon, dendrite
 
 
 # Apparently, converting to a map and reconverting to an image removes some noise.
@@ -198,7 +216,7 @@ def get_number_original_files():
     return i
 
 
-def save_train_test_images(n=10, square_size=224):
+def save_train_test_images(n=10):
     generator = get_files_path_generator()
     for i in range(0, n):
         print(i)
@@ -206,6 +224,7 @@ def save_train_test_images(n=10, square_size=224):
         image = tifffile.imread(file_path)
         actin, axon, dendrite = split_tif_image(image)
         _, actin_colored, axon_colored, dendrite_colored = get_colored_images(actin, axon, dendrite)
+        actin_contour, axon_contour, dendrite_contour = get_contour_map(actin_colored, axon_colored, dendrite_colored)
 
         if not os.path.exists(folder_images_saving):
             os.makedirs(folder_images_saving)
@@ -214,10 +233,9 @@ def save_train_test_images(n=10, square_size=224):
         if not os.path.exists(folder_images_saving_train_y):
             os.makedirs(folder_images_saving_train_y)
 
-        # np.save(folder_images_saving_train_x + "/" + str(i), get_contour_map(actin_colored[:square_size, :square_size]))
-        np.save(folder_images_saving_train_x + "/" + str(i), get_contour_map(actin_colored))
-        # np.save(folder_images_saving_train_y + "/" + str(i), get_contour_map(dendrite_colored[:square_size, :square_size]))
-        np.save(folder_images_saving_train_y + "/" + str(i), get_contour_map(dendrite_colored))
+        np.save(folder_images_saving_train_x + "/" + str(i), actin_contour)
+        # np.save(folder_images_saving_train_y + "/" + str(i), axon_contour)
+        np.save(folder_images_saving_train_y + "/" + str(i), dendrite_contour)
 
 
 def display_tif_image(file_path, with_colored_images=True, with_merged_image=True):
@@ -305,7 +323,7 @@ def load_dataset(nb_examples=100, crop_size=224):
 
 if __name__ == '__main__':
     # display_images_one_by_one()
-    save_train_test_images(1000)
+    save_train_test_images(100)
     # get_smallest_image_dimension()
     # print_images_size()
 
@@ -313,6 +331,10 @@ if __name__ == '__main__':
     #     '/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
     # actin, axon, dendrite = split_tif_image(image)
     # merged, actin, axon, dendrite = get_colored_images(actin, axon, dendrite)
+    # actin_contour, _, _ = get_contour_map(actin, None, None)
+    # actin, _, _ = get_image_from_contour_map(actin_contour, None, None)
+    # plt.imshow(actin)
+    # plt.show()
 
     # square_size = 224
     # plt.imshow(actin)

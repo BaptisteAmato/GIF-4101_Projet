@@ -10,18 +10,6 @@ K.set_image_data_format('channels_last')
 from utils import *
 
 
-def load_dataset(nb_examples=100, input_shape=224):
-    train_set_x_orig = np.zeros((nb_examples, input_shape, input_shape, 1))
-    train_set_y_orig = np.zeros((nb_examples, input_shape, input_shape, 1))
-    train_x_path = "dataset/train_x"
-    train_y_path = "dataset/train_y"
-    for i in range(0, nb_examples):
-        train_set_x_orig[i] = np.load(train_x_path + "/" + str(i) + ".npy")
-        train_set_y_orig[i] = np.load(train_y_path + "/" + str(i) + ".npy")
-
-    return train_set_x_orig, train_set_y_orig, train_set_x_orig, train_set_y_orig
-
-
 def MyModel(input_shape):
     model = Sequential([
         ############# ENCODER ###############
@@ -167,7 +155,7 @@ def MyModel(input_shape):
 
 
 # Load dataset.
-nb_examples = 100
+nb_examples = 2
 crop_size = 224
 X_train, Y_train, X_test, Y_test = load_dataset(nb_examples, crop_size)
 print ("number of training examples = " + str(X_train.shape[0]))
@@ -192,7 +180,7 @@ print()
 print("Loss = " + str(preds[0]))
 print("Test Accuracy = " + str(preds[1]))
 
-# Test on image.
+# Test on image: actin + dendrite (no axon for now).
 index = 0
 x = np.load(folder_images_saving_train_x + '/' + str(index) + '.npy')
 y = np.load(folder_images_saving_train_x + '/' + str(index) + '.npy')
@@ -200,8 +188,7 @@ crops_x, crops_y = get_all_crops(x, y, crop_size)
 crop_index = 0
 x = crops_x[crop_index]
 y = crops_y[crop_index]
-img_x = get_image_from_contour_map(x)
-img_y = get_image_from_contour_map(y, 'r')
+img_x, _, img_y = get_image_from_contour_map(x, None, y)
 print()
 test = np.zeros((1, x.shape[0], x.shape[1], x.shape[2]))
 test[0] = x

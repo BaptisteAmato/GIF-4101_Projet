@@ -202,7 +202,10 @@ Learning} par \textbf{Calimeri, F.
 
 TODO: expliquer comment sont faits les masques
 
-\section{Taille de images d'entrée}
+
+\section{Images d'entrée}
+
+\subsection{Taille}
 
 Les images en entrée sont toutes de dimensions différentes, mais de même résolution.
 Il est donc nécessaire de conserver ces résolutions (ayant un sens physique) en
@@ -210,6 +213,14 @@ n'effectuant aucun redimmensionnement. Le problème est que le réseau de neuron
 attend des images de même taille en entrée : nous avons donc découpé chacune des
 images en \textit{crops} (petits carrés) de taille 224x224, correspondant à la taille
 des images en entrée du réseau \textbf{VGG16}, mentionné plus bas.
+
+\subsection{Contenu}
+
+Notre problème étant une détection de contour, nous créons à partir des images d'entrée
+des matrices composées de 0, 1, 2 et 3 : 0 pour le fond, 2 pour les axones, 3 pour
+les dendrites, et 1 pour l'actine qui n'est ni axone, ni dendrite. Ainsi, nous
+fournissons en entrée une matrice binaire, avec comme label une matrice composée
+de 0, 1, 2 et 3.
 
 \section{Prédiction d'une nouvelle image}
 

@@ -143,6 +143,7 @@ def MyModel(input_shape):
         Conv2D(1, (5, 5), strides=(1, 1), name='conv19'),
         BatchNormalization(axis=3, name='bn19'),
         Activation('sigmoid')],
+
         name='MyModel')
 
     # 224x224x1
