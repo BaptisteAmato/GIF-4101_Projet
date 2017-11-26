@@ -18,6 +18,7 @@ main.ipynb
 
 # generated data
 dataset/*
+*.hdf5
 
 # cache
 __pycache__/*

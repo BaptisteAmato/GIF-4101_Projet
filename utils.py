@@ -233,6 +233,8 @@ def load_dataset(nb_examples=100, nb_crops=4, input_shape=224):
     train_set_y_orig = np.zeros((nb_examples * nb_crops, input_shape, input_shape, 1))
     j = 0
     for i in range(0, nb_examples):
+        if i % 100 == 0:
+            print(i)
         x = np.load(folder_images_saving_train_x + "/" + str(i) + ".npy")
         y = np.load(folder_images_saving_train_y + "/" + str(i) + ".npy")
         crops_x, crops_y = get_random_crops(x, y)
