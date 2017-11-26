@@ -13,8 +13,8 @@ from utils import *
 def load_dataset(nb_examples=100, input_shape=224):
     train_set_x_orig = np.zeros((nb_examples, input_shape, input_shape, 1))
     train_set_y_orig = np.zeros((nb_examples, input_shape, input_shape, 1))
-    train_x_path = "dataset/train_x"
-    train_y_path = "dataset/train_y"
+    train_x_path = main_folder_path+"/dataset/train_x"
+    train_y_path = main_folder_path+"/dataset/train_y"
     for i in range(0, nb_examples):
         train_set_x_orig[i] = np.load(train_x_path + "/" + str(i) + ".npy")
         train_set_y_orig[i] = np.load(train_y_path + "/" + str(i) + ".npy")
@@ -167,7 +167,7 @@ def MyModel(input_shape):
 
 
 # Load dataset.
-nb_examples = 100
+nb_examples = 9
 crop_size = 224
 X_train, Y_train, X_test, Y_test = load_dataset(nb_examples, crop_size)
 print ("number of training examples = " + str(X_train.shape[0]))

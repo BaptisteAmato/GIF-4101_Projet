@@ -305,7 +305,8 @@ def load_dataset(nb_examples=100, crop_size=224):
 
 if __name__ == '__main__':
     # display_images_one_by_one()
-    save_train_test_images(1000)
+    save_train_test_images(9)
+
     # get_smallest_image_dimension()
     # print_images_size()
 
