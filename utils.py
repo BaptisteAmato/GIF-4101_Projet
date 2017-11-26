@@ -305,7 +305,7 @@ def load_dataset(nb_examples=100, crop_size=224):
 
 if __name__ == '__main__':
     # display_images_one_by_one()
-    # save_train_test_images(1000)
+    save_train_test_images(1000)
     # get_smallest_image_dimension()
     # print_images_size()
 
@@ -325,8 +325,8 @@ if __name__ == '__main__':
     # actin = actin[:square_size, :square_size]
     # exit()
 
-    image = tifffile.imread(
-        '/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
-    actin, axon, dendrite = split_tif_image(image)
-    merged, actin_colored, axon_colored, dendrite_colored = get_colored_images(actin, axon, dendrite)
+    # image = tifffile.imread(
+    #     '/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
+    # actin, axon, dendrite = split_tif_image(image)
+    # merged, actin_colored, axon_colored, dendrite_colored = get_colored_images(actin, axon, dendrite)
 
