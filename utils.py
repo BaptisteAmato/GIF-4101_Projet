@@ -41,12 +41,15 @@ def get_smallest_image_dimension():
     return min_rows, min_cols
 
 
-def split_image(image):
-    """
-    As the original images should not be resized, each image is split into several little squares
-    """
-    # TODO
-    return
+def get_random_crops(x, y, nb_crops=4, crop_size=224):
+    crops_x = np.zeros((nb_crops, crop_size, crop_size, 1))
+    crops_y = np.zeros((nb_crops, crop_size, crop_size, 1))
+    for i in range(0, nb_crops):
+        row = np.random.randint(0, x.shape[0] - crop_size)
+        col = np.random.randint(0, x.shape[1] - crop_size)
+        crops_x[i] = x[row:row+crop_size, col:col+crop_size]
+        crops_y[i] = y[row:row+crop_size, col:col+crop_size]
+    return crops_x, crops_y
 
 
 def get_mirrored_images(actin, axon, dendrite):
@@ -163,7 +166,7 @@ def get_number_original_files():
     return i
 
 
-def save_train_test_images(n=10, square_size=227):
+def save_train_test_images(n=10, square_size=224):
     generator = get_files_path_generator()
     for i in range(0, n):
         print(i)
@@ -179,15 +182,10 @@ def save_train_test_images(n=10, square_size=227):
         if not os.path.exists(folder_images_saving_train_y):
             os.makedirs(folder_images_saving_train_y)
 
-        # cv2.imwrite(folder_images_saving_train_x + "/" + str(i) + '.png', actin_colored[:square_size, :square_size])
-        # # cv2.imwrite(folder_images_saving_train_y + "/" + str(i) + '_axon.png', axon_colored)
-        # # cv2.imwrite(folder_images_saving_train_y + "/" + str(i) + '_dendrite.png', dendrite_colored)
-        # cv2.imwrite(folder_images_saving_train_y + "/" + str(i) + '.png', dendrite_colored[:square_size, :square_size])
-
-        np.save(folder_images_saving_train_x + "/" + str(i), get_contour_map(actin_colored[:square_size, :square_size]))
-        # cv2.imwrite(folder_images_saving_train_y + "/" + str(i) + '_axon.png', axon_colored)
-        # cv2.imwrite(folder_images_saving_train_y + "/" + str(i) + '_dendrite.png', dendrite_colored)
-        np.save(folder_images_saving_train_y + "/" + str(i), get_contour_map(dendrite_colored[:square_size, :square_size]))
+        # np.save(folder_images_saving_train_x + "/" + str(i), get_contour_map(actin_colored[:square_size, :square_size]))
+        np.save(folder_images_saving_train_x + "/" + str(i), get_contour_map(actin_colored))
+        # np.save(folder_images_saving_train_y + "/" + str(i), get_contour_map(dendrite_colored[:square_size, :square_size]))
+        np.save(folder_images_saving_train_y + "/" + str(i), get_contour_map(dendrite_colored))
 
 
 def display_tif_image(file_path, with_colored_images=True, with_merged_image=True):
@@ -229,9 +227,24 @@ def display_images_one_by_one():
     for file_path in get_files_path_generator():
         display_tif_image(file_path, True, False)
 
+
+def load_dataset(nb_examples=100, nb_crops=4, input_shape=224):
+    train_set_x_orig = np.zeros((nb_examples * nb_crops, input_shape, input_shape, 1))
+    train_set_y_orig = np.zeros((nb_examples * nb_crops, input_shape, input_shape, 1))
+    j = 0
+    for i in range(0, nb_examples):
+        x = np.load(folder_images_saving_train_x + "/" + str(i) + ".npy")
+        y = np.load(folder_images_saving_train_y + "/" + str(i) + ".npy")
+        crops_x, crops_y = get_random_crops(x, y)
+        for k in range(0, nb_crops):
+            train_set_x_orig[i + k] = crops_x[k]
+            train_set_y_orig[i + k] = crops_y[k]
+
+    return train_set_x_orig, train_set_y_orig, train_set_x_orig, train_set_y_orig
+
 if __name__ == '__main__':
     # display_images_one_by_one()
-    save_train_test_images(500)
+    save_train_test_images(1000)
     # get_smallest_image_dimension()
 
     image = tifffile.imread(
@@ -239,7 +252,7 @@ if __name__ == '__main__':
     actin, axon, dendrite = split_tif_image(image)
     merged, actin, axon, dendrite = get_colored_images(actin, axon, dendrite)
 
-    square_size = 281
+    # square_size = 224
     # plt.imshow(actin)
     # plt.show()
     # plt.imshow(actin[:square_size, :square_size])
