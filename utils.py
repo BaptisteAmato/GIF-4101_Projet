@@ -4,7 +4,7 @@ import cv2
 import skimage.external.tifffile as tifffile
 import matplotlib.pyplot as plt
 import skimage.color as color
-import skimage.transform as transform
+import math
 from config import *
 
 
@@ -49,6 +49,38 @@ def get_random_crops(x, y, nb_crops=4, crop_size=224):
         col = np.random.randint(0, x.shape[1] - crop_size)
         crops_x[i] = x[row:row+crop_size, col:col+crop_size]
         crops_y[i] = y[row:row+crop_size, col:col+crop_size]
+    return crops_x, crops_y
+
+
+def get_all_crops(x, y, crop_size=224):
+    rows = x.shape[0]
+    cols = x.shape[1]
+    nb_crops = math.ceil(rows / crop_size) * math.ceil(cols / crop_size)
+    crops_x = np.zeros((nb_crops, crop_size, crop_size, 1))
+    crops_y = np.zeros((nb_crops, crop_size, crop_size, 1))
+    k = 0
+    for i in range(0, rows - crop_size, crop_size):
+        for j in range(0, cols - crop_size, crop_size):
+            crops_x[k] = x[i:i + crop_size, j:j + crop_size]
+            crops_y[k] = y[i:i + crop_size, j:j + crop_size]
+            k += 1
+        # Last columns, not added yet.
+        j = cols - crop_size
+        crops_x[k] = x[i:i + crop_size, j:j + crop_size]
+        crops_y[k] = y[i:i + crop_size, j:j + crop_size]
+        k += 1
+
+    # Last rows, not added yet.
+    i = rows - crop_size
+    for j in range(0, cols - crop_size, crop_size):
+        crops_x[k] = x[i:i + crop_size, j:j + crop_size]
+        crops_y[k] = y[i:i + crop_size, j:j + crop_size]
+        k += 1
+    # Last columns of last rows, not added yet.
+    j = cols - crop_size
+    crops_x[k] = x[i:i + crop_size, j:j + crop_size]
+    crops_y[k] = y[i:i + crop_size, j:j + crop_size]
+
     return crops_x, crops_y
 
 
@@ -228,7 +260,14 @@ def display_images_one_by_one():
         display_tif_image(file_path, True, False)
 
 
-def load_dataset(nb_examples=100, nb_crops=4, input_shape=224):
+def print_images_size():
+    for file_path in get_files_path_generator():
+        image = tifffile.imread(file_path)
+        print(image.shape)
+        input()
+
+
+def load_dataset_random_crops(nb_examples=100, nb_crops=4, input_shape=224):
     train_set_x_orig = np.zeros((nb_examples * nb_crops, input_shape, input_shape, 1))
     train_set_y_orig = np.zeros((nb_examples * nb_crops, input_shape, input_shape, 1))
     j = 0
@@ -244,15 +283,36 @@ def load_dataset(nb_examples=100, nb_crops=4, input_shape=224):
 
     return train_set_x_orig, train_set_y_orig, train_set_x_orig, train_set_y_orig
 
+
+def load_dataset(nb_examples=100, crop_size=224):
+    train_set_x_orig = []
+    train_set_y_orig = []
+    for i in range(0, nb_examples):
+        if i % 100 == 0:
+            print(i)
+        x = np.load(folder_images_saving_train_x + "/" + str(i) + ".npy")
+        y = np.load(folder_images_saving_train_y + "/" + str(i) + ".npy")
+        crops_x, crops_y = get_all_crops(x, y, crop_size)
+        length = crops_x.shape[0]
+        for k in range(0, length):
+            train_set_x_orig.append(crops_x[k])
+            train_set_y_orig.append(crops_y[k])
+
+    train_set_x_orig = np.array(train_set_x_orig)
+    train_set_y_orig = np.array(train_set_y_orig)
+
+    return train_set_x_orig, train_set_y_orig, train_set_x_orig, train_set_y_orig
+
 if __name__ == '__main__':
     # display_images_one_by_one()
-    save_train_test_images(1000)
+    # save_train_test_images(1000)
     # get_smallest_image_dimension()
+    # print_images_size()
 
-    image = tifffile.imread(
-        '/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
-    actin, axon, dendrite = split_tif_image(image)
-    merged, actin, axon, dendrite = get_colored_images(actin, axon, dendrite)
+    # image = tifffile.imread(
+    #     '/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
+    # actin, axon, dendrite = split_tif_image(image)
+    # merged, actin, axon, dendrite = get_colored_images(actin, axon, dendrite)
 
     # square_size = 224
     # plt.imshow(actin)
@@ -264,4 +324,9 @@ if __name__ == '__main__':
     # exit()
     # actin = actin[:square_size, :square_size]
     # exit()
+
+    image = tifffile.imread(
+        '/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
+    actin, axon, dendrite = split_tif_image(image)
+    merged, actin_colored, axon_colored, dendrite_colored = get_colored_images(actin, axon, dendrite)
 

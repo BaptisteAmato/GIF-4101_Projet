@@ -1,28 +1,12 @@
-import numpy as np
-import cv2
-import os
-from keras import layers
-from keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, UpSampling2D
-from keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalMaxPooling2D, GlobalAveragePooling2D
-from keras.models import Model, Sequential
-from keras.preprocessing import image
-from keras.utils import layer_utils
-from keras.utils.data_utils import get_file
-from keras.callbacks import ModelCheckpoint
-from keras.applications.imagenet_utils import preprocess_input
-import pydot
-from IPython.display import SVG
-from keras.utils.vis_utils import model_to_dot
-from keras.utils import plot_model
-import math
-import h5py
-
+from keras.layers import Activation, ZeroPadding2D, BatchNormalization, Conv2D, UpSampling2D
 import keras.backend as K
-K.set_image_data_format('channels_last')
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import imshow
+from keras.callbacks import ModelCheckpoint
+from keras.layers import Activation, ZeroPadding2D, BatchNormalization, Conv2D, UpSampling2D
+from keras.layers import MaxPooling2D, Dropout
+from keras.models import Sequential
 
-from loss_function import *
+K.set_image_data_format('channels_last')
+
 from utils import *
 
 
@@ -182,14 +166,10 @@ def MyModel(input_shape):
     return model
 
 
-X_train_orig, Y_train_orig, X_test_orig, Y_test_orig = load_dataset()
-
-# Normalize image vectors
-X_train = X_train_orig/255.
-X_test = X_test_orig/255.
-Y_train = Y_train_orig/255.
-Y_test = Y_test_orig/255.
-
+# Load dataset.
+nb_examples = 100
+crop_size = 224
+X_train, Y_train, X_test, Y_test = load_dataset(nb_examples, crop_size)
 print ("number of training examples = " + str(X_train.shape[0]))
 print ("number of test examples = " + str(X_test.shape[0]))
 print ("X_train shape: " + str(X_train.shape))
@@ -197,30 +177,44 @@ print ("Y_train shape: " + str(Y_train.shape))
 print ("X_test shape: " + str(X_test.shape))
 print ("Y_test shape: " + str(Y_test.shape))
 
+# Load model. Best weights are saved after each epoch.
 myModel = MyModel(X_train.shape[1:])
 myModel.compile(optimizer="adam", loss='binary_crossentropy', metrics=["accuracy"])
 checkpointer = ModelCheckpoint(filepath="weights.hdf5", verbose=1, save_best_only=True)
-hist = myModel.fit(x=X_train, y=Y_train, validation_split=0.3, epochs=5, batch_size=15, callbacks=[checkpointer])
+# Run the model.
+hist = myModel.fit(x=X_train, y=Y_train, validation_split=0.3, epochs=10, batch_size=50, callbacks=[checkpointer])
+# Load the best weights (maybe over-fitting after some epochs).
 myModel.load_weights('weights.hdf5')
 
+# Evaluation of the model.
 preds = myModel.evaluate(x=X_test, y=Y_test)
 print()
-print ("Loss = " + str(preds[0]))
-print ("Test Accuracy = " + str(preds[1]))
+print("Loss = " + str(preds[0]))
+print("Test Accuracy = " + str(preds[1]))
 
-img_path = 'dataset/train_x/0.npy'
-x = np.load(img_path)
-img = get_image_from_contour_map(x)
+# Test on image.
+index = 0
+x = np.load(folder_images_saving_train_x + '/' + str(index) + '.npy')
+y = np.load(folder_images_saving_train_x + '/' + str(index) + '.npy')
+crops_x, crops_y = get_all_crops(x, y, crop_size)
+crop_index = 0
+x = crops_x[crop_index]
+y = crops_y[crop_index]
+img_x = get_image_from_contour_map(x)
+img_y = get_image_from_contour_map(y, 'r')
 print()
 test = np.zeros((1, x.shape[0], x.shape[1], x.shape[2]))
 test[0] = x
 
 prediction = myModel.predict(test)
-print(prediction)
 prediction[prediction <= 0.5] = 0
 prediction[prediction > 0.5] = 1
-print(prediction.shape)
 
+# Input
+plt.imshow(img_x)
+# Prediction
+plt.figure()
 plt.imshow(get_image_from_contour_map(prediction[0], 'r'))
-
-np.save('prediction', prediction[0])
+# Truth
+plt.figure()
+plt.imshow(img_y)
