@@ -1,37 +1,16 @@
 import os
 
-import matplotlib.pyplot as plt
-import numpy as np
 import skimage.external.tifffile as tifffile
 
 from config import *
-from image_processing import *
 from data_augmentation import *
+from image_processing import *
 
 folder_images_saving = main_folder_path + '/dataset'
 folder_images_saving_train_x = folder_images_saving + '/train_x'
 folder_images_saving_train_y = folder_images_saving + '/train_y'
 
 # Image example: 2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif
-
-
-# (314, 281)
-def get_smallest_image_dimension():
-    N = get_number_original_files()
-    min_rows = np.inf
-    min_cols = np.inf
-    i = 0
-    for file_path in get_files_path_generator():
-        print(str(i + 1) + "/" + str(N))
-        image = tifffile.imread(file_path)
-        # Remove number of channels from shape
-        shape = image.shape[1:]
-        if min_rows > shape[0]:
-            min_rows = shape[0]
-        if min_cols > shape[1]:
-            min_cols = shape[1]
-        i += 1
-    return min_rows, min_cols
 
 
 def get_files_path_generator():
@@ -73,53 +52,6 @@ def save_train_test_images(n=10):
         np.save(folder_images_saving_train_x + "/" + str(i), actin_contour)
         # np.save(folder_images_saving_train_y + "/" + str(i), axon_contour)
         np.save(folder_images_saving_train_y + "/" + str(i), dendrite_contour)
-
-
-def display_tif_image(file_path, with_colored_images=True, with_merged_image=True):
-    image = tifffile.imread(file_path)
-    actin, axon, dendrite = split_tif_image(image)
-    print("Image imported: " + file_path)
-    # If with_colored_images == False, subplots on one line only.
-    plt.subplot(1 + with_colored_images, 3, 1)
-    plt.title("Actin")
-    plt.imshow(actin)
-    plt.subplot(1 + with_colored_images, 3, 2)
-    plt.title("Axon")
-    plt.imshow(axon)
-    plt.subplot(1 + with_colored_images, 3, 3)
-    plt.title("Dendrite")
-    plt.imshow(dendrite)
-
-    merged, actin, axon, dendrite = get_colored_images(actin, axon, dendrite)
-    if with_colored_images:
-        plt.subplot(2, 3, 4)
-        plt.title("Actin colored")
-        plt.imshow(actin)
-        plt.subplot(2, 3, 5)
-        plt.title("Axon colored")
-        plt.imshow(axon)
-        plt.subplot(2, 3, 6)
-        plt.title("Dendrite colored")
-        plt.imshow(dendrite)
-    # Show full screen.
-    mng = plt.get_current_fig_manager()
-    mng.resize(*mng.window.maxsize())
-    if with_merged_image:
-        plt.figure()
-        plt.imshow(merged)
-    plt.show()
-
-
-def display_images_one_by_one():
-    for file_path in get_files_path_generator():
-        display_tif_image(file_path, True, False)
-
-
-def print_images_size():
-    for file_path in get_files_path_generator():
-        image = tifffile.imread(file_path)
-        print(image.shape)
-        input()
 
 
 def load_dataset_random_crops(nb_examples=100, nb_crops=4, input_shape=224):
