@@ -1,16 +1,8 @@
 import os
-
-import skimage.external.tifffile as tifffile
-
-from config import *
+from sklearn.model_selection import train_test_split
+from constants import *
 from data_augmentation import *
 from image_processing import *
-
-folder_images_saving = main_folder_path + '/dataset'
-folder_images_saving_train_x = folder_images_saving + '/train_x'
-folder_images_saving_train_y = folder_images_saving + '/train_y'
-
-# Image example: 2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif
 
 
 def get_files_path_generator():
@@ -21,7 +13,7 @@ def get_files_path_generator():
                 yield os.path.join(subdir, file)
 
 
-def get_train_test_images(tif_image):
+def get_train_label_images(tif_image):
     actin_original, axon_original, dendrite_original = split_tif_image(tif_image)
     _, actin, axon, dendrite = get_colored_images(actin_original, axon_original, dendrite_original)
     actin, axon, dendrite = get_contour_map(actin, axon, dendrite)
@@ -32,7 +24,7 @@ def get_train_test_images(tif_image):
     return train, test
 
 
-def get_images_from_train_test(train, test):
+def get_images_from_train_label(train, label):
     rows = train.shape[0]
     cols = train.shape[1]
     if train is not None:
@@ -41,11 +33,8 @@ def get_images_from_train_test(train, test):
     else:
         actin = np.array([])
 
-    if test is not None:
-        axon = np.zeros((rows, cols, 3))
-        axon[:, :, 0] = np.squeeze(test[:, :, 0]) * 255
-        dendrite = np.zeros((rows, cols, 3))
-        dendrite[:, :, 2] = np.squeeze(test[:, :, 1]) * 255
+    if label is not None:
+        axon, dendrite = get_axon_dendrite_from_label(label)
     else:
         axon = np.array([])
         dendrite = np.array([])
@@ -53,7 +42,17 @@ def get_images_from_train_test(train, test):
     return actin, axon, dendrite
 
 
-def save_train_test_images(n=10):
+def get_axon_dendrite_from_label(label):
+    rows = label.shape[0]
+    cols = label.shape[1]
+    axon = np.zeros((rows, cols, 3))
+    axon[:, :, 0] = np.squeeze(label[:, :, 0]) * 255
+    dendrite = np.zeros((rows, cols, 3))
+    dendrite[:, :, 2] = np.squeeze(label[:, :, 1]) * 255
+    return axon, dendrite
+
+
+def save_train_label_images(n=10):
     # Create folders if not exist.
     if not os.path.exists(folder_images_saving):
         os.makedirs(folder_images_saving)
@@ -67,16 +66,16 @@ def save_train_test_images(n=10):
         print(i)
         file_path = next(generator)
         tif_image = tifffile.imread(file_path)
-        train, test = get_train_test_images(tif_image)
+        train, label = get_train_label_images(tif_image)
         np.save(folder_images_saving_train_x + "/" + str(i), train)
-        np.save(folder_images_saving_train_x + "/" + str(i), test)
+        np.save(folder_images_saving_train_y + "/" + str(i), label)
 
 
-# For now, y is just the dendrite. Axons not taken into account during tests.
-def load_dataset(nb_examples=100, crop_size=224, min_ones_ratio=0.2):
+# TODO:
+def load_dataset(nb_examples=100, train_ratio=0.7, min_ones_ratio=0.2):
     """
     :param nb_examples:
-    :param crop_size:
+    :param train_ratio:
     :param min_ones_ratio: ratio of "1" in the entire matrix. Allows not to save empty matrices.
     :return:
     """
@@ -88,36 +87,23 @@ def load_dataset(nb_examples=100, crop_size=224, min_ones_ratio=0.2):
             print(i)
         x = np.load(folder_images_saving_train_x + "/" + str(i) + ".npy")
         y = np.load(folder_images_saving_train_y + "/" + str(i) + ".npy")
-        crops_x, _, crops_y = get_all_crops(x, None, y, crop_size)
+        crops_x, crops_y = get_all_crops(x, y)
         length = crops_x.shape[0]
         for j in range(0, length):
-            # We do not want to keep black crops, so we make sure there is some data in it.
-            if np.sum(crops_x[j]) > min_ones and np.sum(crops_y[j]) > min_ones:
-                actins, _, dendrites = get_mirrored_images(crops_x[j], None, crops_y[j])
+            # We do not want to keep black crops, so we make sure there is some data in both train and label matrices.
+            if np.sum(crops_x[j]) > min_ones and np.sum(crops_y[j, :, :, 0]) > min_ones and np.sum(crops_y[j, :, :, 1]) > min_ones:
+                flips_x, flips_y = get_flips_images(crops_x[j], crops_y[j])
                 for k in range(0, 3):
-                    train_set_x_orig.append(actins[k])
-                    train_set_y_orig.append(dendrites[k])
+                    train_set_x_orig.append(flips_x[k])
+                    train_set_y_orig.append(flips_y[k])
 
-    train_set_x_orig = np.array(train_set_x_orig)
-    train_set_y_orig = np.array(train_set_y_orig)
-
-    return train_set_x_orig, train_set_y_orig, train_set_x_orig, train_set_y_orig
+    return train_test_split(np.array(train_set_x_orig), np.array(train_set_y_orig), train_size=train_ratio)
 
 
 if __name__ == '__main__':
     # display_images_one_by_one()
-    save_train_test_images(1000)
+    # save_train_label_images(1040)
     # get_smallest_image_dimension()
     # print_images_size()
-    # load_dataset()
-
-    # image = tifffile.imread('/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
-    # train, test = get_train_test_images(image)
-    # actin, axon, dendrite = get_images_from_train_test(train, test)
-    # plt.imshow(actin)
-    # plt.show()
-    # plt.imshow(axon)
-    # plt.show()
-    # plt.imshow(dendrite)
-    # plt.show()
+    load_dataset(1)
 

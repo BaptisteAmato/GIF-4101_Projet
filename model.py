@@ -6,11 +6,13 @@ from keras.models import Sequential
 K.set_image_data_format('channels_last')
 
 
+# TODO: test with/without batch normalization.
+# TODO: test with Conv2DTranspose instead of Conv2D in Decoder.
 def MyModel(input_shape):
     model = Sequential([
         ############# ENCODER ###############
         # 224x224x1
-        Conv2D(64, (3, 3), strides=(1, 1), padding='same', activation='relu', name='conv0'),
+        Conv2D(64, (3, 3), strides=(1, 1), padding='same', activation='relu', name='conv0', input_shape=input_shape),
         # BatchNormalization(axis=3, name='bn0'),
 
         # 224x224x64
@@ -82,32 +84,37 @@ def MyModel(input_shape):
         # BatchNormalization(axis=3, name='bn14'),
         Dropout(0.3),
 
+        # 14x14x512
         UpSampling2D(size=(2, 2), name='upsampling15'),
         Conv2D(256, (5, 5), strides=(1, 1), padding='same', activation='relu', name='conv15'),
         # BatchNormalization(axis=3, name='bn15'),
         Dropout(0.3),
 
+        # 28x28x256
         UpSampling2D(size=(2, 2), name='upsampling16'),
         Conv2D(128, (5, 5), strides=(1, 1), padding='same', activation='relu', name='conv16'),
         # BatchNormalization(axis=3, name='bn16'),
         Dropout(0.3),
 
+        # 56x56x128
         UpSampling2D(size=(2, 2), name='upsampling17'),
         Conv2D(64, (5, 5), strides=(1, 1), padding='same', activation='relu', name='conv17'),
         # BatchNormalization(axis=3, name='bn17'),
         Dropout(0.3),
 
+        # 112x112x64
         UpSampling2D(size=(2, 2), name='upsampling18'),
         Conv2D(32, (5, 5), strides=(1, 1), padding='same', activation='relu', name='conv18'),
         # BatchNormalization(axis=3, name='bn18'),
         Dropout(0.3),
 
-        Conv2D(1, (5, 5), strides=(1, 1), padding='same', activation='sigmoid', name='conv19'),
+        # 224x224x32
+        Conv2D(2, (5, 5), strides=(1, 1), padding='same', activation='sigmoid', name='conv19'),
         # BatchNormalization(axis=3, name='bn19'),
     ],
 
         name='MyModel')
 
-    # 224x224x1
+    # 224x224x2
 
     return model
