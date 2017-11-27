@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from utils import *
 
 
-def display_tif_image(file_path, with_colored_images=True, with_merged_image=True):
+def display_tif_image(file_path, with_colored_images=True, with_merged_image=False):
     image = tifffile.imread(file_path)
     actin, axon, dendrite = split_tif_image(image)
     print("Image imported: " + file_path)
@@ -38,9 +38,9 @@ def display_tif_image(file_path, with_colored_images=True, with_merged_image=Tru
     plt.show()
 
 
-def display_images_one_by_one():
+def display_images_one_by_one(with_colored_images=True, with_merged_image=False):
     for file_path in get_files_path_generator():
-        display_tif_image(file_path, True, False)
+        display_tif_image(file_path, with_colored_images, with_merged_image)
 
 
 # 1041
@@ -81,4 +81,4 @@ def print_smallest_image_dimension():
     print(min_rows)
     print(min_cols)
 
-# display_images_one_by_one()
+display_images_one_by_one(with_merged_image=True)
