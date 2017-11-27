@@ -21,17 +21,6 @@ def get_files_path_generator():
                 yield os.path.join(subdir, file)
 
 
-# 1041
-def get_number_original_files():
-    i = 0
-    for subdir, dirs, files in os.walk(main_folder_path):
-        for file in files:
-            filename, file_extension = os.path.splitext(file)
-            if file_extension == ".tif":
-                i += 1
-    return i
-
-
 def save_train_test_images(n=10):
     generator = get_files_path_generator()
     for i in range(0, n):
@@ -54,23 +43,24 @@ def save_train_test_images(n=10):
         np.save(folder_images_saving_train_y + "/" + str(i), dendrite_contour)
 
 
-def load_dataset_random_crops(nb_examples=100, nb_crops=4, input_shape=224):
-    train_set_x_orig = np.zeros((nb_examples * nb_crops, input_shape, input_shape, 1))
-    train_set_y_orig = np.zeros((nb_examples * nb_crops, input_shape, input_shape, 1))
-    j = 0
-    for i in range(0, nb_examples):
-        if i % 100 == 0:
-            print(i)
-        x = np.load(folder_images_saving_train_x + "/" + str(i) + ".npy")
-        y = np.load(folder_images_saving_train_y + "/" + str(i) + ".npy")
-        crops_x, crops_y = get_random_crops(x, y)
-        for k in range(0, nb_crops):
-            train_set_x_orig[i + k] = crops_x[k]
-            train_set_y_orig[i + k] = crops_y[k]
+# def load_dataset_random_crops(nb_examples=100, nb_crops=4, input_shape=224):
+#     train_set_x_orig = np.zeros((nb_examples * nb_crops, input_shape, input_shape, 1))
+#     train_set_y_orig = np.zeros((nb_examples * nb_crops, input_shape, input_shape, 1))
+#     j = 0
+#     for i in range(0, nb_examples):
+#         if i % 100 == 0:
+#             print(i)
+#         x = np.load(folder_images_saving_train_x + "/" + str(i) + ".npy")
+#         y = np.load(folder_images_saving_train_y + "/" + str(i) + ".npy")
+#         crops_x, crops_y = get_random_crops(x, y)
+#         for k in range(0, nb_crops):
+#             train_set_x_orig[i + k] = crops_x[k]
+#             train_set_y_orig[i + k] = crops_y[k]
+#
+#     return train_set_x_orig, train_set_y_orig, train_set_x_orig, train_set_y_orig
 
-    return train_set_x_orig, train_set_y_orig, train_set_x_orig, train_set_y_orig
 
-
+# For now, y is just the dendrite. Axons not taken into account during tests.
 def load_dataset(nb_examples=100, crop_size=224, min_ones_ratio=0.2):
     """
     :param nb_examples:
@@ -86,13 +76,15 @@ def load_dataset(nb_examples=100, crop_size=224, min_ones_ratio=0.2):
             print(i)
         x = np.load(folder_images_saving_train_x + "/" + str(i) + ".npy")
         y = np.load(folder_images_saving_train_y + "/" + str(i) + ".npy")
-        crops_x, crops_y = get_all_crops(x, y, crop_size)
+        crops_x, _, crops_y = get_all_crops(x, None, y, crop_size)
         length = crops_x.shape[0]
-        for k in range(0, length):
+        for j in range(0, length):
             # We do not want to keep black crops, so we make sure there is some data in it.
-            if np.sum(crops_x[k]) > min_ones and np.sum(crops_y[k]) > min_ones:
-                train_set_x_orig.append(crops_x[k])
-                train_set_y_orig.append(crops_y[k])
+            if np.sum(crops_x[j]) > min_ones and np.sum(crops_y[j]) > min_ones:
+                actins, _, dendrites = get_mirrored_images(crops_x[j], None, crops_y[j])
+                for k in range(0, 3):
+                    train_set_x_orig.append(actins[k])
+                    train_set_y_orig.append(dendrites[k])
 
     train_set_x_orig = np.array(train_set_x_orig)
     train_set_y_orig = np.array(train_set_y_orig)

@@ -43,6 +43,18 @@ def display_images_one_by_one():
         display_tif_image(file_path, True, False)
 
 
+# 1041
+def print_number_original_files():
+    i = 0
+    for subdir, dirs, files in os.walk(main_folder_path):
+        for file in files:
+            filename, file_extension = os.path.splitext(file)
+            if file_extension == ".tif":
+                i += 1
+    print(i)
+    return i
+
+
 def print_images_size():
     for file_path in get_files_path_generator():
         image = tifffile.imread(file_path)
@@ -52,7 +64,7 @@ def print_images_size():
 
 # (314, 281)
 def print_smallest_image_dimension():
-    N = get_number_original_files()
+    N = print_number_original_files()
     min_rows = np.inf
     min_cols = np.inf
     i = 0
@@ -68,3 +80,5 @@ def print_smallest_image_dimension():
         i += 1
     print(min_rows)
     print(min_cols)
+
+# display_images_one_by_one()
