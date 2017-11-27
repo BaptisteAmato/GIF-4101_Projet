@@ -117,40 +117,72 @@ def get_colored_images(actin, axon, dendrite, thresh=10):
     return merged, actin, axon, dendrite
 
 
+# def get_contour_map(actin, axon, dendrite):
+#     if actin is not None:
+#         colored_indexes = np.where(actin == 255)
+#         actin = np.zeros((actin.shape[0], actin.shape[1], 1))
+#         actin[colored_indexes[0], colored_indexes[1]] = 1
+#
+#     if axon is not None:
+#         colored_indexes = np.where(axon == 255)
+#         axon = np.zeros((axon.shape[0], axon.shape[1], 1))
+#         axon[colored_indexes[0], colored_indexes[1]] = 2
+#
+#     if dendrite is not None:
+#         colored_indexes = np.where(dendrite == 255)
+#         dendrite = np.zeros((dendrite.shape[0], dendrite.shape[1], 1))
+#         dendrite[colored_indexes[0], colored_indexes[1]] = 3
+#
+#     return actin, axon, dendrite
+
+
 def get_contour_map(actin, axon, dendrite):
     if actin is not None:
-        colored_indexes = np.where(actin == 255)
-        actin = np.zeros((actin.shape[0], actin.shape[1], 1))
-        actin[colored_indexes[0], colored_indexes[1]] = 1
+        actin = np.expand_dims(np.sum(actin, axis=2), axis=2)
 
     if axon is not None:
-        colored_indexes = np.where(axon == 255)
-        axon = np.zeros((axon.shape[0], axon.shape[1], 1))
-        axon[colored_indexes[0], colored_indexes[1]] = 2
+        axon = np.expand_dims(np.sum(axon, axis=2), axis=2)
 
     if dendrite is not None:
-        colored_indexes = np.where(dendrite == 255)
-        dendrite = np.zeros((dendrite.shape[0], dendrite.shape[1], 1))
-        dendrite[colored_indexes[0], colored_indexes[1]] = 3
+        dendrite = np.expand_dims(np.sum(dendrite, axis=2), axis=2)
 
     return actin, axon, dendrite
 
 
+# def get_image_from_contour_map(actin, axon, dendrite):
+#     if actin is not None:
+#         indexes = np.where(actin == 1)
+#         actin = np.zeros((actin.shape[0], actin.shape[1], 3), dtype=np.uint8)
+#         actin[indexes[0], indexes[1], 1] = 255
+#
+#     if axon is not None:
+#         indexes = np.where(axon == 2)
+#         axon = np.zeros((axon.shape[0], axon.shape[1], 3), dtype=np.uint8)
+#         axon[indexes[0], indexes[1], 0] = 255
+#
+#     if dendrite is not None:
+#         indexes = np.where(dendrite == 3)
+#         dendrite = np.zeros((dendrite.shape[0], dendrite.shape[1], 3), dtype=np.uint8)
+#         dendrite[indexes[0], indexes[1], 2] = 255
+#
+#     return actin, axon, dendrite
+
+
 def get_image_from_contour_map(actin, axon, dendrite):
     if actin is not None:
-        indexes = np.where(actin == 1)
-        actin = np.zeros((actin.shape[0], actin.shape[1], 3), dtype=np.uint8)
-        actin[indexes[0], indexes[1], 1] = 255
+        new_actin = np.zeros((actin.shape[0], actin.shape[1], 3), dtype=np.uint8)
+        new_actin[:, :, 1] = np.squeeze(actin, axis=2)
+        actin = new_actin
 
     if axon is not None:
-        indexes = np.where(axon == 2)
-        axon = np.zeros((axon.shape[0], axon.shape[1], 3), dtype=np.uint8)
-        axon[indexes[0], indexes[1], 0] = 255
+        new_axon = np.zeros((axon.shape[0], axon.shape[1], 3), dtype=np.uint8)
+        new_axon[:, :, 2] = np.squeeze(axon, axis=2)
+        axon = new_axon
 
     if dendrite is not None:
-        indexes = np.where(dendrite == 3)
-        dendrite = np.zeros((dendrite.shape[0], dendrite.shape[1], 3), dtype=np.uint8)
-        dendrite[indexes[0], indexes[1], 2] = 255
+        new_dendrite = np.zeros((dendrite.shape[0], dendrite.shape[1], 3), dtype=np.uint8)
+        new_dendrite[:, :, 2] = np.squeeze(dendrite, axis=2)
+        dendrite = new_dendrite
 
     return actin, axon, dendrite
 
@@ -165,5 +197,10 @@ if __name__ == '__main__':
     image = tifffile.imread('/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
     actin, axon, dendrite = split_tif_image(image)
     merged, actin_colored, axon_colored, dendrite_colored = get_colored_images(actin, axon, dendrite)
-    plt.imshow(actin_colored)
+    # plt.imshow(actin_colored)
+    # plt.show()
+    a, _, _ = get_contour_map(actin_colored, None, None)
+    print(a.shape)
+    a, _, _ = get_image_from_contour_map(a, None, None)
+    plt.imshow(a)
     plt.show()
