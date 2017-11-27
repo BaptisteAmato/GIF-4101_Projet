@@ -196,7 +196,7 @@ Learning} par \textbf{Calimeri, F.
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.3]{"ex_mask"}
+\includegraphics[scale=0.35]{"ex_mask"}
 \caption{En haut, un triplet actine-axone-dendrite, et en bas les mêmes images une fois le masque appliqué}
 \end{figure}
 
@@ -216,11 +216,13 @@ des images en entrée du réseau \textbf{VGG16}, mentionné plus bas.
 
 \subsection{Contenu}
 
-Notre problème étant une détection de contour, nous créons à partir des images d'entrée
-des matrices composées de 0, 1, 2 et 3 : 0 pour le fond, 2 pour les axones, 3 pour
-les dendrites, et 1 pour l'actine qui n'est ni axone, ni dendrite. Ainsi, nous
-fournissons en entrée une matrice binaire, avec comme label une matrice composée
-de 0, 1, 2 et 3.
+% TODO: changer! Maintenant, la matrice input n'est pas binaire mais float entre 0 et 1 (selon l'intensité)
+Notre problème est une détection de contour, mais nous devons inclure la notion
+d'\textbf{intensité} dans nos matrices d'entrée (valeur allant de 0 à 255).
+Les images sont normalisées entre 0 et 1 ; une matrice d'entraînement sera de
+taille 224x224x1 (intensités de l'actine), et le label associé sera une matrice
+de taille 224x224x2, avec le premier channel correspondant aux axones et le second
+aux dendrites.
 
 \section{Prédiction d'une nouvelle image}
 

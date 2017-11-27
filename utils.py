@@ -21,43 +21,55 @@ def get_files_path_generator():
                 yield os.path.join(subdir, file)
 
 
+def get_train_test_images(tif_image):
+    actin_original, axon_original, dendrite_original = split_tif_image(tif_image)
+    _, actin, axon, dendrite = get_colored_images(actin_original, axon_original, dendrite_original)
+    actin, axon, dendrite = get_contour_map(actin, axon, dendrite)
+    train = np.expand_dims(actin, axis=2)
+    test = np.zeros((train.shape[0], train.shape[1], 2))
+    test[:, :, 0] = axon
+    test[:, :, 1] = dendrite
+    return train, test
+
+
+def get_images_from_train_test(train, test):
+    rows = train.shape[0]
+    cols = train.shape[1]
+    if train is not None:
+        actin = np.zeros((rows, cols, 3))
+        actin[:, :, 1] = np.squeeze(train) * 255
+    else:
+        actin = np.array([])
+
+    if test is not None:
+        axon = np.zeros((rows, cols, 3))
+        axon[:, :, 0] = np.squeeze(test[:, :, 0]) * 255
+        dendrite = np.zeros((rows, cols, 3))
+        dendrite[:, :, 2] = np.squeeze(test[:, :, 1]) * 255
+    else:
+        axon = np.array([])
+        dendrite = np.array([])
+
+    return actin, axon, dendrite
+
+
 def save_train_test_images(n=10):
+    # Create folders if not exist.
+    if not os.path.exists(folder_images_saving):
+        os.makedirs(folder_images_saving)
+    if not os.path.exists(folder_images_saving_train_x):
+        os.makedirs(folder_images_saving_train_x)
+    if not os.path.exists(folder_images_saving_train_y):
+        os.makedirs(folder_images_saving_train_y)
+
     generator = get_files_path_generator()
     for i in range(0, n):
         print(i)
         file_path = next(generator)
-        image = tifffile.imread(file_path)
-        actin, axon, dendrite = split_tif_image(image)
-        _, actin_colored, axon_colored, dendrite_colored = get_colored_images(actin, axon, dendrite)
-        actin_contour, axon_contour, dendrite_contour = get_contour_map(actin_colored, axon_colored, dendrite_colored)
-
-        if not os.path.exists(folder_images_saving):
-            os.makedirs(folder_images_saving)
-        if not os.path.exists(folder_images_saving_train_x):
-            os.makedirs(folder_images_saving_train_x)
-        if not os.path.exists(folder_images_saving_train_y):
-            os.makedirs(folder_images_saving_train_y)
-
-        np.save(folder_images_saving_train_x + "/" + str(i), actin_contour)
-        # np.save(folder_images_saving_train_y + "/" + str(i), axon_contour)
-        np.save(folder_images_saving_train_y + "/" + str(i), dendrite_contour)
-
-
-# def load_dataset_random_crops(nb_examples=100, nb_crops=4, input_shape=224):
-#     train_set_x_orig = np.zeros((nb_examples * nb_crops, input_shape, input_shape, 1))
-#     train_set_y_orig = np.zeros((nb_examples * nb_crops, input_shape, input_shape, 1))
-#     j = 0
-#     for i in range(0, nb_examples):
-#         if i % 100 == 0:
-#             print(i)
-#         x = np.load(folder_images_saving_train_x + "/" + str(i) + ".npy")
-#         y = np.load(folder_images_saving_train_y + "/" + str(i) + ".npy")
-#         crops_x, crops_y = get_random_crops(x, y)
-#         for k in range(0, nb_crops):
-#             train_set_x_orig[i + k] = crops_x[k]
-#             train_set_y_orig[i + k] = crops_y[k]
-#
-#     return train_set_x_orig, train_set_y_orig, train_set_x_orig, train_set_y_orig
+        tif_image = tifffile.imread(file_path)
+        train, test = get_train_test_images(tif_image)
+        np.save(folder_images_saving_train_x + "/" + str(i), train)
+        np.save(folder_images_saving_train_x + "/" + str(i), test)
 
 
 # For now, y is just the dendrite. Axons not taken into account during tests.
@@ -99,27 +111,13 @@ if __name__ == '__main__':
     # print_images_size()
     # load_dataset()
 
-    # image = tifffile.imread(
-    #     '/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
-    # actin, axon, dendrite = split_tif_image(image)
-    # merged, actin, axon, dendrite = get_colored_images(actin, axon, dendrite)
-    # actin_contour, _, _ = get_contour_map(actin, None, None)
-    # actin, _, _ = get_image_from_contour_map(actin_contour, None, None)
+    # image = tifffile.imread('/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
+    # train, test = get_train_test_images(image)
+    # actin, axon, dendrite = get_images_from_train_test(train, test)
     # plt.imshow(actin)
     # plt.show()
-
-    # square_size = 224
-    # plt.imshow(actin)
+    # plt.imshow(axon)
     # plt.show()
-    # plt.imshow(actin[:square_size, :square_size])
+    # plt.imshow(dendrite)
     # plt.show()
-    # actin = actin[:square_size, :square_size]
-    # print(np.where(actin == 255))
-    # exit()
-    # actin = actin[:square_size, :square_size]
-    # exit()
 
-    # image = tifffile.imread(
-    #     '/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
-    # actin, axon, dendrite = split_tif_image(image)
-    # merged, actin_colored, axon_colored, dendrite_colored = get_colored_images(actin, axon, dendrite)
