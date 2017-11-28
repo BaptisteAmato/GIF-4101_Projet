@@ -29,6 +29,7 @@ def get_colored_images(actin, axon, dendrite, thresh=10):
     axon = cv2.equalizeHist(axon)
     dendrite = dendrite.astype(np.uint8)
     dendrite = image_enhancement(dendrite)
+    dendrite = cv2.equalizeHist(dendrite)
 
     _, actin = cv2.threshold(actin, thresh, 255, cv2.THRESH_TOZERO)
     _, axon = cv2.threshold(axon, thresh, 255, cv2.THRESH_TOZERO)
@@ -78,3 +79,6 @@ def get_contour_map(actin, axon, dendrite):
 if __name__ == '__main__':
     image = tifffile.imread('/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
     actin, axon, dendrite = split_tif_image(image)
+    _, actin, axon, dendrite = get_colored_images(actin, axon, dendrite)
+    plt.imshow(actin)
+    plt.show()

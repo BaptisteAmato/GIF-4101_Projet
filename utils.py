@@ -1,6 +1,7 @@
 import os
+
 from sklearn.model_selection import train_test_split
-from constants import *
+
 from data_augmentation import *
 from image_processing import *
 
@@ -71,19 +72,18 @@ def save_train_label_images(n=10):
         np.save(folder_images_saving_train_y + "/" + str(i), label)
 
 
-# TODO:
 def load_dataset(nb_examples=100, train_ratio=0.7, min_ones_ratio=0.2):
     """
     :param nb_examples:
     :param train_ratio:
     :param min_ones_ratio: ratio of "1" in the entire matrix. Allows not to save empty matrices.
-    :return:
+    :return: X_train, X_test, y_train, y_test
     """
     min_ones = crop_size * min_ones_ratio
     train_set_x_orig = []
     train_set_y_orig = []
     for i in range(0, nb_examples):
-        if i % 100 == 0:
+        if i % 10 == 0:
             print(i)
         x = np.load(folder_images_saving_train_x + "/" + str(i) + ".npy")
         y = np.load(folder_images_saving_train_y + "/" + str(i) + ".npy")
@@ -96,6 +96,7 @@ def load_dataset(nb_examples=100, train_ratio=0.7, min_ones_ratio=0.2):
                 for k in range(0, 3):
                     train_set_x_orig.append(flips_x[k])
                     train_set_y_orig.append(flips_y[k])
+    print("Splitting train/test")
 
     return train_test_split(np.array(train_set_x_orig), np.array(train_set_y_orig), train_size=train_ratio)
 
