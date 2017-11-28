@@ -77,37 +77,37 @@ def MyModel(input_shape):
         # 7x7x512
         Conv2D(512, (1, 1), strides=(1, 1), activation='relu', name='conv13'),
         # BatchNormalization(axis=3, name='bn13'),
-        Dropout(0.3),
+        # Dropout(0.3),
 
         # 7x7x512
         UpSampling2D(size=(2, 2), name='upsampling14'),
         Conv2D(512, (5, 5), strides=(1, 1), padding='same', activation='relu', name='conv14'),
         # BatchNormalization(axis=3, name='bn14'),
-        Dropout(0.3),
+        # Dropout(0.3),
 
         # 14x14x512
         UpSampling2D(size=(2, 2), name='upsampling15'),
         Conv2D(256, (5, 5), strides=(1, 1), padding='same', activation='relu', name='conv15'),
         # BatchNormalization(axis=3, name='bn15'),
-        Dropout(0.3),
+        # Dropout(0.3),
 
         # 28x28x256
         UpSampling2D(size=(2, 2), name='upsampling16'),
         Conv2D(128, (5, 5), strides=(1, 1), padding='same', activation='relu', name='conv16'),
         # BatchNormalization(axis=3, name='bn16'),
-        Dropout(0.3),
+        # Dropout(0.3),
 
         # 56x56x128
         UpSampling2D(size=(2, 2), name='upsampling17'),
         Conv2D(64, (5, 5), strides=(1, 1), padding='same', activation='relu', name='conv17'),
         # BatchNormalization(axis=3, name='bn17'),
-        Dropout(0.3),
+        # Dropout(0.3),
 
         # 112x112x64
         UpSampling2D(size=(2, 2), name='upsampling18'),
         Conv2D(32, (5, 5), strides=(1, 1), padding='same', activation='relu', name='conv18'),
         # BatchNormalization(axis=3, name='bn18'),
-        Dropout(0.3),
+        # Dropout(0.3),
 
         # 224x224x32
         Conv2D(2, (5, 5), strides=(1, 1), padding='same', activation='sigmoid', name='conv19'),

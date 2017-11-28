@@ -9,7 +9,7 @@ K.set_image_data_format('channels_last')
 if __name__ == '__main__':
 
     # Load dataset.
-    nb_images = 50
+    nb_images = 100
     X_train, X_test, y_train, y_test = load_dataset(nb_images)
 
     nb_examples = X_train.shape[0]
