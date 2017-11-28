@@ -7,11 +7,12 @@ import numpy as np
 from config import *
 
 
-# img_sx = 295
-# img_sy = 360
-img_sx = 600
-img_sy = 600
-filename = "damier.jpg" # "actin.png"
+img_sx = 360
+img_sy = 295
+filename = "/actin.png"
+# img_sx = 600
+# img_sy = 600
+# filename = "/damier.jpg" # "actin.png"
 
 def generate_deformation(n,sizex,sizey,k):
     # Les 4 points des extrémités ne sont pas modifié
@@ -28,10 +29,11 @@ def generate_deformation(n,sizex,sizey,k):
 
 grid_x, grid_y = np.mgrid[0:img_sx:img_sx*1j, 0:img_sy:img_sy*1j]
 destination,source = generate_deformation(10,img_sx,img_sy,20)
+print(destination,source)
 
 grid_z = griddata(destination, source, (grid_x, grid_y), method='cubic')
-map_x = np.append([], [ar[:,1] for ar in grid_z]).reshape(600,600)
-map_y = np.append([], [ar[:,0] for ar in grid_z]).reshape(600,600)
+map_x = np.append([], [ar[:,1] for ar in grid_z]).reshape(img_sx,img_sy)
+map_y = np.append([], [ar[:,0] for ar in grid_z]).reshape(img_sx,img_sy)
 map_x_32 = map_x.astype('float32')
 map_y_32 = map_y.astype('float32')
 
