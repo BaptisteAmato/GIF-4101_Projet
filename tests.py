@@ -9,12 +9,13 @@ K.set_image_data_format('channels_last')
 if __name__ == '__main__':
 
     # Load dataset.
-    nb_images = 100
+    nb_images = 5
     X_train, X_test, y_train, y_test = load_dataset(nb_images)
 
-    nb_examples = X_train.shape[0]
-    print("number of training examples = " + str(nb_examples))
-    print("number of test examples = " + str(X_test.shape[0]))
+    nb_train_examples = X_train.shape[0]
+    nb_test_examples = X_test.shape[0]
+    print("number of training examples = " + str(nb_train_examples))
+    print("number of test examples = " + str(nb_test_examples))
     print("X_train shape: " + str(X_train.shape))
     print("Y_train shape: " + str(y_train.shape))
     print("X_test shape: " + str(X_test.shape))
@@ -41,7 +42,7 @@ if __name__ == '__main__':
     print("Test Accuracy = " + str(preds[1]))
 
     # Test on image.
-    index = np.random.randint(nb_examples)
+    index = np.random.randint(nb_test_examples)
     test = X_test[index]
     label = y_test[index]
     true_actin, true_axon, true_dendrite = get_images_from_train_label(test, label)
