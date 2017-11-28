@@ -46,21 +46,26 @@ def get_colored_images(actin, axon, dendrite, thresh=10):
     # Red
     axon[:, :, 1] = 0
     axon[:, :, 2] = 0
-    index_non_zeros_axon = np.where(axon != [0, 0, 0])
 
     # Blue
     dendrite[:, :, 0] = 0
     dendrite[:, :, 1] = 0
-    index_non_zeros_dendrite = np.where(dendrite != [0, 0, 0])
 
-    merged = np.copy(actin)
-    merged[index_non_zeros_axon] = axon[index_non_zeros_axon]
-    merged[index_non_zeros_dendrite] = dendrite[index_non_zeros_dendrite]
+    merged = merge_images(actin, axon, dendrite)
 
     # merged = image_enhancement(merged, kernel_erode=5)
     # actin = image_enhancement(actin, kernel_erode=5)
 
     return merged, actin, axon, dendrite
+
+
+def merge_images(actin, axon, dendrite):
+    merged = np.copy(actin)
+    index_non_zeros_axon = np.where(axon != [0, 0, 0])
+    merged[index_non_zeros_axon] = axon[index_non_zeros_axon]
+    index_non_zeros_dendrite = np.where(dendrite != [0, 0, 0])
+    merged[index_non_zeros_dendrite] = dendrite[index_non_zeros_dendrite]
+    return merged
 
 
 def get_contour_map(actin, axon, dendrite):

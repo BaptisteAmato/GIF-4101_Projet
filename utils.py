@@ -1,5 +1,6 @@
 import os
 
+from keras.models import model_from_json
 from sklearn.model_selection import train_test_split
 
 from data_augmentation import *
@@ -26,9 +27,10 @@ def get_train_label_images(tif_image):
 
 
 def get_images_from_train_label(train, label):
-    rows = train.shape[0]
-    cols = train.shape[1]
+    merged = None
     if train is not None:
+        rows = train.shape[0]
+        cols = train.shape[1]
         actin = np.zeros((rows, cols, 3))
         actin[:, :, 1] = np.squeeze(train) * 255
     else:
@@ -40,7 +42,10 @@ def get_images_from_train_label(train, label):
         axon = np.array([])
         dendrite = np.array([])
 
-    return actin, axon, dendrite
+    if train is not None and label is not None:
+        merged = merge_images(actin, axon, dendrite)
+
+    return merged, actin, axon, dendrite
 
 
 def get_axon_dendrite_from_label(label):
@@ -101,10 +106,56 @@ def load_dataset(nb_examples=100, train_ratio=0.7, min_ones_ratio=0.2):
     return train_test_split(np.array(train_set_x_orig), np.array(train_set_y_orig), train_size=train_ratio)
 
 
+def test_image(index):
+    x = np.load(folder_images_saving_train_x + "/" + str(index) + ".npy")
+    y = np.load(folder_images_saving_train_y + "/" + str(index) + ".npy")
+    rows = x.shape[0]
+    cols = x.shape[1]
+    print(rows)
+    print(cols)
+    crops_x, _ = get_all_crops(x, None)
+    print(crops_x.shape)
+
+    # Load the model.
+    with open('myModel.json') as f:
+        my_model = model_from_json(f.read())
+    # Load the weights.
+    my_model.load_weights('weights.hdf5')
+    predicted_crop = my_model.predict(crops_x)
+    predicted_label = np.zeros((rows, cols, 1))
+
+    i = 0
+    while i < rows - crop_size:
+        j = 0
+        while j < cols - crop_size:
+            predicted_label[i:i+crop_size, j:j+crop_size] = predicted_crop[i:i+crop_size, j:j+crop_size]
+            j += crop_size
+        # Add the end of the last column's crop.
+            predicted_label[i:i + crop_size, j:cols] = predicted_crop[i:i + crop_size, j:cols]
+        i += crop_size
+    j = 0
+    while j < cols - crop_size:
+        predicted_label[i:i + crop_size, j:j + crop_size] = predicted_crop[i:i + crop_size, j:j + crop_size]
+        j += crop_size
+    # Add the end of the last line and column's crop.
+        predicted_label[i:i + crop_size, j:cols] = predicted_crop[i:i + crop_size, j:cols]
+
+    merged, _, _, _ = get_images_from_train_label(x, y)
+    plt.title("Truth")
+    plt.imshow(merged)
+    prediction, _, _, _ = get_images_from_train_label(x, predicted_label)
+    plt.figure()
+    plt.title("Prediction")
+    plt.imshow(prediction)
+    plt.show()
+
+
 if __name__ == '__main__':
     # display_images_one_by_one()
     # save_train_label_images(1040)
     # get_smallest_image_dimension()
     # print_images_size()
-    load_dataset(1)
+    # load_dataset(1)
+    i = 0
+    test_image(i)
 

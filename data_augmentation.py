@@ -4,7 +4,15 @@ import numpy as np
 
 
 def _get_crop(train, label, i, j):
-    return train[i:i + crop_size, j:j + crop_size], label[i:i + crop_size, j:j + crop_size]
+    if train is not None:
+        train_cropped = train[i:i + crop_size, j:j + crop_size]
+    else:
+        train_cropped = None
+    if label is not None:
+        label_cropped = label[i:i + crop_size, j:j + crop_size]
+    else:
+        label_cropped = None
+    return train_cropped, label_cropped
 
 
 def get_all_crops(train, label):
