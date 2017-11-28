@@ -49,8 +49,6 @@ if __name__ == '__main__':
     data = np.zeros((1, test.shape[0], test.shape[1], test.shape[2]))
     data[0] = test
     prediction = myModel.predict(data)
-    prediction[prediction <= 0.5] = 0
-    prediction[prediction > 0.5] = 1
     print(prediction[0].shape)
     predicted_axon, predicted_dendrite = get_axon_dendrite_from_label(prediction[0])
 
@@ -71,3 +69,4 @@ if __name__ == '__main__':
     plt.figure()
     plt.title("True dendrite")
     plt.imshow(true_dendrite)
+    plt.show()
