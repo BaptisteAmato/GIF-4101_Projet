@@ -118,6 +118,10 @@ def load_model():
 
 
 def test_image(index):
+    """
+    :param index: of the image to test the algorithm.
+    :return: the predicted axon and dendrite images.
+    """
     x = np.load(folder_images_saving_train_x + "/" + str(index) + ".npy")
     y = np.load(folder_images_saving_train_y + "/" + str(index) + ".npy")
     rows = x.shape[0]
