@@ -106,6 +106,17 @@ def load_dataset(nb_examples=100, train_ratio=0.7, min_ones_ratio=0.2):
     return train_test_split(np.array(train_set_x_orig), np.array(train_set_y_orig), train_size=train_ratio)
 
 
+def load_model():
+    # Load the model.
+    with open('myModel.json') as f:
+        my_model = model_from_json(f.read())
+    # Load the weights.
+    my_model.load_weights('weights.hdf5')
+    # Compile the model
+    my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
+    return my_model
+
+
 def test_image(index):
     x = np.load(folder_images_saving_train_x + "/" + str(index) + ".npy")
     y = np.load(folder_images_saving_train_y + "/" + str(index) + ".npy")
@@ -115,39 +126,49 @@ def test_image(index):
     print(cols)
     crops_x, _ = get_all_crops(x, None)
     print(crops_x.shape)
-
-    # Load the model.
-    with open('myModel.json') as f:
-        my_model = model_from_json(f.read())
-    # Load the weights.
-    my_model.load_weights('weights.hdf5')
-    predicted_crop = my_model.predict(crops_x)
-    predicted_label = np.zeros((rows, cols, 1))
-
+    my_model = load_model()
+    predicted_crops = my_model.predict(crops_x, batch_size=1)
+    predicted_label = np.zeros((rows, cols, 2))
+    k = 0
     i = 0
     while i < rows - crop_size:
         j = 0
         while j < cols - crop_size:
-            predicted_label[i:i+crop_size, j:j+crop_size] = predicted_crop[i:i+crop_size, j:j+crop_size]
+            predicted_label[i:i+crop_size, j:j+crop_size] = predicted_crops[k]
+            k += 1
             j += crop_size
         # Add the end of the last column's crop.
-            predicted_label[i:i + crop_size, j:cols] = predicted_crop[i:i + crop_size, j:cols]
+        predicted_label[i:i + crop_size, cols-crop_size:cols] = predicted_crops[k]
+        k += 1
         i += crop_size
     j = 0
     while j < cols - crop_size:
-        predicted_label[i:i + crop_size, j:j + crop_size] = predicted_crop[i:i + crop_size, j:j + crop_size]
+        predicted_label[rows-crop_size:rows, j:j + crop_size] = predicted_crops[k]
+        k += 1
         j += crop_size
     # Add the end of the last line and column's crop.
-        predicted_label[i:i + crop_size, j:cols] = predicted_crop[i:i + crop_size, j:cols]
+    predicted_label[rows-crop_size:rows, cols-crop_size:cols] = predicted_crops[k]
+    k += 1
 
-    merged, _, _, _ = get_images_from_train_label(x, y)
+    merged, _, axon, dendrite = get_images_from_train_label(x, y)
     plt.title("Truth")
+    plt.subplot(131)
     plt.imshow(merged)
-    prediction, _, _, _ = get_images_from_train_label(x, predicted_label)
+    plt.subplot(132)
+    plt.imshow(axon)
+    plt.subplot(133)
+    plt.imshow(dendrite)
+    prediction, _, predicted_axon, predicted_dendrite = get_images_from_train_label(x, predicted_label)
     plt.figure()
     plt.title("Prediction")
+    plt.subplot(131)
     plt.imshow(prediction)
+    plt.subplot(132)
+    plt.imshow(predicted_axon)
+    plt.subplot(133)
+    plt.imshow(predicted_dendrite)
     plt.show()
+    return predicted_axon, predicted_dendrite
 
 
 if __name__ == '__main__':
