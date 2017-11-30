@@ -7,10 +7,9 @@ from utils import *
 K.set_image_data_format('channels_last')
 
 
-if __name__ == '__main__':
+def test_model(model_name, nb_images = 5, validation_split=0.3, epochs=5, batch_size=4, show_example = False):
 
     # Load dataset.
-    nb_images = 5
     X_train, X_test, y_train, y_test = load_dataset(nb_images)
 
     nb_train_examples = X_train.shape[0]
@@ -23,21 +22,37 @@ if __name__ == '__main__':
     print("Y_test shape: " + str(y_test.shape))
 
     # Load model. Best weights are saved after each epoch.
-    my_model = MyModel(X_train.shape[1:])
+
+    import sys
+    sys.path.insert(0, folder_models)
+
+    model_module = __import__(model_name)
+    creation_method = getattr(model_module, model_name)
+
+    my_model = creation_method(X_train.shape[1:])
     my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
-    checkpointer = ModelCheckpoint(filepath="weights.hdf5", verbose=1, save_best_only=True)
+    checkpointer = ModelCheckpoint(filepath=folder_models_weights + "/" +model_name + ".weights", verbose=1, save_best_only=True)
 
     # Run the model.
-    hist = my_model.fit(x=X_train, y=y_train, validation_split=0.3, epochs=5, batch_size=4, callbacks=[checkpointer])
-    # Reload the model.
-    with open('myModel.json') as f:
-        my_model = model_from_json(f.read())
-    # Load the best weights.
-    my_model.load_weights('weights.hdf5')
-    # Save the model to json.
+    hist = my_model.fit(x=X_train, y=y_train, validation_split=validation_split, epochs=epochs, batch_size=batch_size, callbacks=[checkpointer])
+
+    #Save the model with weights to json.
+    my_model.load_weights(folder_models_weights + "/" +model_name + ".weights")
     model_json = my_model.to_json()
-    with open("myModel.json", "w") as json_file:
+
+    # np.save(folder_json_models + "/" + model_name, model_json)
+    with open(folder_json_models + "/" + model_name, "w") as json_file:
         json_file.write(model_json)
+
+    # # Reload the model.
+    # with open('myModel.json') as f:
+    #     my_model = model_from_json(f.read())
+    # # Load the best weights.
+    # my_model.load_weights('weights.hdf5')
+    # # Save the model to json.
+    # model_json = my_model.to_json()
+    # with open("myModel.json", "w") as json_file:
+    #     json_file.write(model_json)
 
     # Evaluate the model.
     preds = my_model.evaluate(x=X_test, y=y_test)
@@ -46,8 +61,9 @@ if __name__ == '__main__':
     print("Test Accuracy = " + str(preds[1]))
 
     # Test on image.
-    index = np.random.randint(nb_test_examples)
-    test_image(folder_images_saving_train_x + "/" + str(i) + ".npy")
+    if show_example:
+        index = np.random.randint(nb_test_examples)
+        test_image(folder_images_saving_train_x + "/" + str(i) + ".npy")
 
     # test = X_test[index]
     # label = y_test[index]

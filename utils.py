@@ -106,18 +106,18 @@ def load_dataset(nb_examples=100, train_ratio=0.7, min_ones_ratio=0.2):
     return train_test_split(np.array(train_set_x_orig), np.array(train_set_y_orig), train_size=train_ratio)
 
 
-def load_model():
+def load_model(model_name):
     # Load the model.
-    with open('myModel.json') as f:
+    with open(folder_json_models + "/" + model_name + '.json') as f:
         my_model = model_from_json(f.read())
     # Load the weights.
-    my_model.load_weights('weights.hdf5')
+    my_model.load_weights(folder_models_weights + "/" +model_name + ".weights")
     # Compile the model
     my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
     return my_model
 
 
-def test_image(index):
+def test_image(index, model_name):
     """
     :param index: of the image to test the algorithm.
     :return: the predicted axon and dendrite images.
@@ -130,7 +130,7 @@ def test_image(index):
     print(cols)
     crops_x, _ = get_all_crops(x, None)
     print(crops_x.shape)
-    my_model = load_model()
+    my_model = load_model(model_name)
     predicted_crops = my_model.predict(crops_x, batch_size=1)
     predicted_label = np.zeros((rows, cols, 2))
     k = 0
@@ -177,10 +177,10 @@ def test_image(index):
 
 if __name__ == '__main__':
     # display_images_one_by_one()
-    # save_train_label_images(1040)
+    save_train_label_images(1040)
     # get_smallest_image_dimension()
     # print_images_size()
     # load_dataset(1)
-    i = 0
-    test_image(i)
+    # i = 0
+    # test_image(i)
 
