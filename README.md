@@ -10,7 +10,9 @@
 Detect axons and dendrites on an actine image (channel 1)
 
 ### TODO
-You need to create a config.py file, and define the main_folder_path in it (path in which are the images)
+You need to create a config.py file, and define two variables in it:
+   - main_folder_path: location of the original images and will be generated the dataset
+   - output_folder_path: folder in which the model's weights and structure will ge saved
 
 ### Server
 Folder: "Projet détection axones dendrites"

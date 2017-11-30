@@ -131,7 +131,7 @@ def test_image(index):
     crops_x, _ = get_all_crops(x, None)
     print(crops_x.shape)
     my_model = load_model()
-    predicted_crops = my_model.predict(crops_x, batch_size=1)
+    predicted_crops = my_model.predict(crops_x, batch_size=64)
     predicted_label = np.zeros((rows, cols, 2))
     k = 0
     i = 0

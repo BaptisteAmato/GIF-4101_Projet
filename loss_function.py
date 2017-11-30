@@ -1,5 +1,3 @@
-from keras.objectives import *
-from keras.metrics import binary_crossentropy
 import keras.backend as K
 import tensorflow as tf
 
