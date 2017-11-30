@@ -108,71 +108,15 @@ def load_dataset(nb_examples=100, train_ratio=0.7, min_ones_ratio=0.2):
 
 def load_model(model_name):
     # Load the model.
-    with open(folder_json_models + "/" + model_name + '.json') as f:
+    with open(folder_models + "/" + model_name + '.json') as f:
         my_model = model_from_json(f.read())
     # Load the weights.
-    my_model.load_weights(folder_models_weights + "/" +model_name + ".weights")
+    my_model.load_weights(folder_models_weights + "/" + model_name + model_weights_suffix)
     # Compile the model
     my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
     return my_model
 
 
-def test_image(index, model_name):
-    """
-    :param index: of the image to test the algorithm.
-    :return: the predicted axon and dendrite images.
-    """
-    x = np.load(folder_images_saving_train_x + "/" + str(index) + ".npy")
-    y = np.load(folder_images_saving_train_y + "/" + str(index) + ".npy")
-    rows = x.shape[0]
-    cols = x.shape[1]
-    print(rows)
-    print(cols)
-    crops_x, _ = get_all_crops(x, None)
-    print(crops_x.shape)
-    my_model = load_model(model_name)
-    predicted_crops = my_model.predict(crops_x, batch_size=1)
-    predicted_label = np.zeros((rows, cols, 2))
-    k = 0
-    i = 0
-    while i < rows - crop_size:
-        j = 0
-        while j < cols - crop_size:
-            predicted_label[i:i+crop_size, j:j+crop_size] = predicted_crops[k]
-            k += 1
-            j += crop_size
-        # Add the end of the last column's crop.
-        predicted_label[i:i + crop_size, cols-crop_size:cols] = predicted_crops[k]
-        k += 1
-        i += crop_size
-    j = 0
-    while j < cols - crop_size:
-        predicted_label[rows-crop_size:rows, j:j + crop_size] = predicted_crops[k]
-        k += 1
-        j += crop_size
-    # Add the end of the last line and column's crop.
-    predicted_label[rows-crop_size:rows, cols-crop_size:cols] = predicted_crops[k]
-    k += 1
-
-    merged, _, axon, dendrite = get_images_from_train_label(x, y)
-    plt.title("Truth")
-    plt.subplot(131)
-    plt.imshow(merged)
-    plt.subplot(132)
-    plt.imshow(axon)
-    plt.subplot(133)
-    plt.imshow(dendrite)
-    prediction, _, predicted_axon, predicted_dendrite = get_images_from_train_label(x, predicted_label)
-    plt.figure()
-    plt.title("Prediction")
-    plt.subplot(131)
-    plt.imshow(prediction)
-    plt.subplot(132)
-    plt.imshow(predicted_axon)
-    plt.subplot(133)
-    plt.imshow(predicted_dendrite)
-    plt.show()
-    return predicted_axon, predicted_dendrite
 
 
 if __name__ == '__main__':

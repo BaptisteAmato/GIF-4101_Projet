@@ -20,5 +20,12 @@ main.ipynb
 dataset/*
 *.hdf5
 
+# outputs
+sharedfolder/*
+
 # cache
 __pycache__/*
+
+# Docker related
+docker_related/*
+

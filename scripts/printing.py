@@ -1,6 +1,4 @@
-import matplotlib.pyplot as plt
-
-from utils import *
+from scripts.utils import *
 
 
 def display_tif_image(file_path, with_colored_images=True, with_merged_image=False):
