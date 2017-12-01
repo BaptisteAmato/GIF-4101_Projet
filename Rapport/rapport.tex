@@ -213,9 +213,8 @@ On applique ensuite un \textit{thresholding} sur chaque image,
 permettant de supprimer du bruit, soit les pixels de très faible intensité :
 on définit un seuil entre 0 et 255 (dans notre cas, 10), et tous les pixels ayant
 une valeur inférieure à 10 sont ramenés à 0. On convertit ensuite les images en
-RGB, et on ne conserve des valeurs non nulles que pour un canal par image(vert pour
+RGB, et on ne conserve des valeurs non nulles que pour un canal par image (vert pour
 l'actine, rouge pour les axones et bleu pour les dendrites).
-
 
 \section{Images d'entrée}
 
@@ -245,6 +244,12 @@ et l'image résultante sera reconstituée à partir de ces \textit{crops}. \\
 On décompose en deux images la prédiction reçue, afin d'obtenir le masque des axones
 et celui des dendrites, qui l'on peut alors supperposer à l'image d'actine originale.
 
+\subsection{Augmentation des données}
+
+Nous avons, pour chaque \textit{crop}, ajouté des \textit{flips} (opérations "miroir")
+permettant d'avoir en sortie 4 nouvelles données (l'originale, la symmétrie horizontale,
+verticale et l'enchaînement des deux).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Réseau de neurones}
@@ -266,12 +271,52 @@ dans le monde du Deep Learning.
 
 \chapter{Tests}
 
-+ bcp d'images apres data augmentation --> resourceexhausted sur nos pcs, meme gpu
-+ utilisation gpu distant : docker
+Le jeu de données, après transformations, est très lourd (plusieurs dizaines de Giga Octets).
+De plus, chaque image n'est pas fournie telle quelle au réseau de neurones, mais
+est découpée en \textit{crops} qui, selon la taille de l'image, peuvent être au nombre
+de 30 voire 40 pour une unique image. Ainsi, nos ordinateurs ne pouvaient pas
+créer des tableaux \textit{numpy} contenant toutes les données. De plus, lors des
+entraînements du réseau, nous avons été confrontés à des \textit{ResourceExhaustedError},
+donc nous devions utiliser des tailles de \textit{mini-batches} très petites (4 au plus),
+ce qui ne donne pas de bons résultats. \\
+Nous avons alors obtenu l'accès à une machine des laboratoires de l'université ayant
+un GPU puissant afin d'effectuer des tests sur un grand nombre de données et des
+tailles de \textit{mini-batches} raisonnables (32). Il a été nécessaire de créer
+une instance \textit{Docker} pour pouvoir empaqueter notre code dans la machine ;
+une fois cela fait nous avions accès à distance à notre code et pouvions donc
+lancer plusieurs tests sur l'ensemble des données. \\
+Chaque exécution de modèle génère deux fichiers, tous deux accompagnés du nom du
+modèle en question : l'un conserve la structure du modèle en \textit{.json} et
+l'autre sauvegarde les poids appris en \textit{.hdf5}. On peut ainsi "re-créer"
+en local le modèle déjà appris et voir ce qu'il donne sur différentes images.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Résultats}
+
+\section{Premiers résultats}
+
+Nos premiers résultats ont montré que notre réseau avait du mal à distinguer
+les axones et dendrites de l'actine. En effet, on voit ci-dessous que les deux labels
+retracent en grande partie l'image de l'actine, bien que les dendrites soient assez
+bien détourées. Afin de supprimer les faibles intensités, correspondant aux valeurs
+"peu sûres", nous appliquons un \textit{threshold} en post-traitement.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{"truth"}
+\caption{Images originales, avec l'image fusionnée, les axones et les dendrites}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{"result"}
+\caption{Images prédites, avec l'image fusionnée, les axones et les dendrites}
+\end{figure}
+
+Les résultats ci-dessus ont été obtenus avec le modèle issu de l'article de
+\textit{Yang et al.}, entraînés sur 500 images d'origine. On obtient un erreur
+très élevée d'environ 45\%.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Analyse}

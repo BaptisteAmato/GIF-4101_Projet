@@ -138,7 +138,6 @@ def model_yang(input_shape):
     return model
 
 
-# Only for tests. TODO: remove following.
 def model_yang_2(input_shape):
     model = Sequential([
         ############# ENCODER ###############
@@ -222,42 +221,42 @@ def model_yang_2(input_shape):
         Conv2D(512, (1, 1), strides=(1, 1), name='conv13'),
         BatchNormalization(axis=3, name='bn13'),
         Activation('relu'),
-        Dropout(0.3),
+        Dropout(0.2),
 
         # 7x7x512
         UpSampling2D(size=(2, 2), name='upsampling14'),
         Conv2D(512, (5, 5), strides=(1, 1), padding='same', name='conv14'),
         BatchNormalization(axis=3, name='bn14'),
         Activation('relu'),
-        Dropout(0.3),
+        Dropout(0.2),
 
         # 14x14x512
         UpSampling2D(size=(2, 2), name='upsampling15'),
         Conv2D(256, (5, 5), strides=(1, 1), padding='same', name='conv15'),
         BatchNormalization(axis=3, name='bn15'),
         Activation('relu'),
-        Dropout(0.3),
+        Dropout(0.2),
 
         # 28x28x256
         UpSampling2D(size=(2, 2), name='upsampling16'),
         Conv2D(128, (5, 5), strides=(1, 1), padding='same', name='conv16'),
         BatchNormalization(axis=3, name='bn16'),
         Activation('relu'),
-        Dropout(0.3),
+        Dropout(0.2),
 
         # 56x56x128
         UpSampling2D(size=(2, 2), name='upsampling17'),
         Conv2D(64, (5, 5), strides=(1, 1), padding='same', name='conv17'),
         BatchNormalization(axis=3, name='bn17'),
         Activation('relu'),
-        Dropout(0.3),
+        Dropout(0.2),
 
         # 112x112x64
         UpSampling2D(size=(2, 2), name='upsampling18'),
         Conv2D(32, (5, 5), strides=(1, 1), padding='same', name='conv18'),
         BatchNormalization(axis=3, name='bn18'),
         Activation('relu'),
-        Dropout(0.3),
+        Dropout(0.2),
 
         # 224x224x32
         Conv2D(2, (5, 5), strides=(1, 1), padding='same', name='conv19'),

@@ -1,39 +1,42 @@
 import sys
 
 from keras.callbacks import ModelCheckpoint
+from tensorflow.python.framework.errors_impl import ResourceExhaustedError
 
 from utils import *
 
 
-def get_model_weights_path(model_name):
-    # Create folder if not exist.
-    if not os.path.exists(folder_models_weights):
-        os.makedirs(folder_models_weights)
-    return folder_models_weights + "/" + model_name + model_weights_suffix
+def _predict(my_model, crops_x, batch_size):
+    batch_size = int(batch_size)
+    # In case of a ResourceExhaustedError, the batch_size in divided by 2 and the fit_model() is retried.
+    try:
+        return my_model.predict(crops_x, batch_size=batch_size)
+    except ResourceExhaustedError:
+        print("######## ResourceExhaustedError ###########")
+        batch_size = int(batch_size) / 2
+        print("######## PREDICTING THE CROPS with batch_size = " + str(batch_size) + " ###########")
+    return _predict(my_model, crops_x, batch_size)
 
 
-def get_model_path(model_name):
-    # Create folder if not exist.
-    if not os.path.exists(folder_models):
-        os.makedirs(folder_models)
-    return folder_models + "/" + model_name + ".json"
-
-
-def test_image(index, model_name):
+def test_image(index, model_name, thresh_results=False, threshold=8, batch_size=32):
     """
     :param index: of the image to test the algorithm.
     :return: the predicted axon and dendrite images.
     """
+    print("########## LOADING THE IMAGE ##############")
     x = np.load(folder_images_saving_train_x + "/" + str(index) + ".npy")
     y = np.load(folder_images_saving_train_y + "/" + str(index) + ".npy")
     rows = x.shape[0]
     cols = x.shape[1]
     print(rows)
     print(cols)
+    print("########## CROPPING THE IMAGE ##############")
     crops_x, _ = get_all_crops(x, None)
     print(crops_x.shape)
     my_model = load_model(model_name)
-    predicted_crops = my_model.predict(crops_x, batch_size=1)
+    print("########## PREDICTING THE CROPS ##############")
+    predicted_crops = _predict(my_model, crops_x, batch_size)
+    print("########## RECONSTITUTING THE IMAGE ##############")
     predicted_label = np.zeros((rows, cols, 2))
     k = 0
     i = 0
@@ -65,6 +68,12 @@ def test_image(index, model_name):
     plt.subplot(133)
     plt.imshow(dendrite)
     prediction, _, predicted_axon, predicted_dendrite = get_images_from_train_label(x, predicted_label)
+
+    if thresh_results:
+        _, prediction = cv2.threshold(prediction, threshold, 255, cv2.THRESH_TOZERO)
+        _, predicted_axon = cv2.threshold(predicted_axon, threshold, 255, cv2.THRESH_TOZERO)
+        _, predicted_dendrite = cv2.threshold(predicted_dendrite, threshold, 255, cv2.THRESH_TOZERO)
+
     plt.figure()
     plt.title("Prediction")
     plt.subplot(131)
@@ -77,7 +86,20 @@ def test_image(index, model_name):
     return predicted_axon, predicted_dendrite
 
 
-def train_model(model_name="model_yang", nb_images=2, epochs=1, batch_size=1, validation_split=0.3, evaluate=False, show_example=False):
+def _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, checkpointer):
+    batch_size = int(batch_size)
+    # In case of a ResourceExhaustedError, the batch_size in divided by 2 and the fit_model() is retried.
+    try:
+        return my_model.fit(x=X_train, y=y_train, validation_split=validation_split, epochs=epochs, batch_size=batch_size,
+                     callbacks=[checkpointer])
+    except ResourceExhaustedError:
+        print("######## ResourceExhaustedError ###########")
+        batch_size = int(batch_size) / 2
+        print("######## RUNNING THE MODEL with batch_size = " + str(batch_size) + " ###########")
+    return _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, checkpointer)
+
+
+def train_model(model_name="model_yang", nb_images=2, epochs=1, batch_size=2, validation_split=0.3, evaluate=False, show_example=False):
     # Load dataset.
     print("######## LOADING THE MODEL ###########")
     X_train, X_test, y_train, y_test = load_dataset(nb_images)
@@ -96,13 +118,14 @@ def train_model(model_name="model_yang", nb_images=2, epochs=1, batch_size=1, va
     get_model = getattr(model_module, model_name)
 
     my_model = get_model(X_train.shape[1:])
-    my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
+    # my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
+    my_model.compile(optimizer="adam", loss='logcosh', metrics=["accuracy"])
     # Best weights are saved after each epoch.
     checkpointer = ModelCheckpoint(filepath=get_model_weights_path(model_name), verbose=1, save_best_only=True)
 
     # Run the model.
     print("######## RUNNING THE MODEL ###########")
-    hist = my_model.fit(x=X_train, y=y_train, validation_split=validation_split, epochs=epochs, batch_size=batch_size, callbacks=[checkpointer])
+    _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, checkpointer)
 
     # Load the best weights.
     print("######## LOADING THE BEST WEIGHTS ###########")
