@@ -99,10 +99,10 @@ def _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size,
     return _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, checkpointer)
 
 
-def train_model(model_name="model_yang", nb_images=2, epochs=1, batch_size=2, validation_split=0.3, evaluate=False, show_example=False):
+def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=1, batch_size=2, validation_split=0.3, evaluate=False, show_example=False):
     # Load dataset.
     print("######## LOADING THE MODEL ###########")
-    X_train, X_test, y_train, y_test = load_dataset(nb_images)
+    X_train, X_test, y_train, y_test = load_dataset(return_all=return_all, nb_examples=nb_examples)
 
     nb_train_examples = X_train.shape[0]
     nb_test_examples = X_test.shape[0]

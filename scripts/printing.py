@@ -1,4 +1,4 @@
-from scripts.utils import *
+from utils import *
 
 
 def display_tif_image(file_path, with_colored_images=True, with_merged_image=False):
