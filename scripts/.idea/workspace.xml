@@ -80,9 +80,9 @@
         <option value="$PROJECT_DIR$/printing.py" />
         <option value="$PROJECT_DIR$/models.py" />
         <option value="$PROJECT_DIR$/multi_testing.py" />
-        <option value="$PROJECT_DIR$/image_processing.py" />
         <option value="$PROJECT_DIR$/utils.py" />
         <option value="$PROJECT_DIR$/tests.py" />
+        <option value="$PROJECT_DIR$/image_processing.py" />
       </list>
     </option>
   </component>
