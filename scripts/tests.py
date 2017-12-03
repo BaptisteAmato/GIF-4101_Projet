@@ -1,6 +1,6 @@
 import sys
 
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, CSVLogger
 from tensorflow.python.framework.errors_impl import ResourceExhaustedError
 
 from utils import *
@@ -86,20 +86,21 @@ def test_image(index, model_name, thresh_results=False, threshold=8, batch_size=
     return predicted_axon, predicted_dendrite
 
 
-def _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, checkpointer):
+def _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, callbacks):
     batch_size = int(batch_size)
     # In case of a ResourceExhaustedError, the batch_size in divided by 2 and the fit_model() is retried.
     try:
         return my_model.fit(x=X_train, y=y_train, validation_split=validation_split, epochs=epochs, batch_size=batch_size,
-                     callbacks=[checkpointer])
+                     callbacks=callbacks)
     except ResourceExhaustedError:
         print("######## ResourceExhaustedError ###########")
         batch_size = int(batch_size) / 2
         print("######## RUNNING THE MODEL with batch_size = " + str(batch_size) + " ###########")
-    return _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, checkpointer)
+    return _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, callbacks)
 
 
-def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=1, batch_size=2, validation_split=0.3, evaluate=False, show_example=False):
+def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=1, batch_size=2, validation_split=0.3,
+                use_saved_weights=False, evaluate=False, show_example=False):
     # Load dataset.
     print("######## LOADING THE MODEL ###########")
     X_train, X_test, y_train, y_test = load_dataset(return_all=return_all, nb_examples=nb_examples)
@@ -119,13 +120,17 @@ def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=
 
     my_model = get_model(X_train.shape[1:])
     # my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
+    if use_saved_weights:
+        my_model.load_weights(get_model_weights_path(model_name))
     my_model.compile(optimizer="adam", loss='logcosh', metrics=["accuracy"])
     # Best weights are saved after each epoch.
     checkpointer = ModelCheckpoint(filepath=get_model_weights_path(model_name), verbose=1, save_best_only=True)
+    # Write output to a file after each epoch.
+    csv_logger = CSVLogger(main_folder_path + '/keras_log.csv', append=True, separator=';')
 
     # Run the model.
     print("######## RUNNING THE MODEL ###########")
-    _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, checkpointer)
+    _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, [checkpointer, csv_logger])
 
     # Load the best weights.
     print("######## LOADING THE BEST WEIGHTS ###########")
