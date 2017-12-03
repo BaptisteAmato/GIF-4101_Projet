@@ -33,7 +33,7 @@ def get_images_from_train_label(train, label):
         rows = train.shape[0]
         cols = train.shape[1]
         actin = np.zeros((rows, cols, 3))
-        actin[:, :, 1] = np.squeeze(train) * 255
+        actin[:, :, 1] = np.squeeze(train)# * 255
     else:
         actin = np.array([])
 
@@ -53,9 +53,9 @@ def get_axon_dendrite_from_label(label):
     rows = label.shape[0]
     cols = label.shape[1]
     axon = np.zeros((rows, cols, 3))
-    axon[:, :, 0] = np.squeeze(label[:, :, 0]) * 255
+    axon[:, :, 0] = np.squeeze(label[:, :, 0])# * 255
     dendrite = np.zeros((rows, cols, 3))
-    dendrite[:, :, 2] = np.squeeze(label[:, :, 1]) * 255
+    dendrite[:, :, 2] = np.squeeze(label[:, :, 1])# * 255
     return axon, dendrite
 
 

@@ -1,9 +1,28 @@
 import sys
 
+import keras.backend as K
+from tensorflow import boolean_mask, logical_and, logical_not, equal, not_equal
 from keras.callbacks import ModelCheckpoint, CSVLogger
 from tensorflow.python.framework.errors_impl import ResourceExhaustedError
 
 from utils import *
+
+
+def own_loss_function(y_true, y_pred):
+    # The predicted values that are colored while the truth is black should be penalized.
+    lambd = 10
+    mask = equal(y_true, 0)
+    mask2 = not_equal(y_pred, 0)
+    mask_to_penalize = logical_and(mask, mask2)
+    mask_rest = logical_not(mask_to_penalize)
+
+    y_pred_penalized = boolean_mask(y_pred, mask_to_penalize)
+    y_true_penalized = boolean_mask(y_true, mask_to_penalize)
+    y_pred_not_penalized = boolean_mask(y_pred, mask_rest)
+    y_true_not_penalized = boolean_mask(y_true, mask_rest)
+
+    return lambd * K.mean(K.square(y_pred_penalized - y_true_penalized), axis=-1) + \
+           K.mean(K.square(y_pred_not_penalized - y_true_not_penalized), axis=-1)
 
 
 def _predict(my_model, crops_x, batch_size):
@@ -18,7 +37,7 @@ def _predict(my_model, crops_x, batch_size):
     return _predict(my_model, crops_x, batch_size)
 
 
-def test_image(index, model_name, thresh_results=False, threshold=8, batch_size=32):
+def test_image(index, model_name, thresh_results=False, threshold=0.1, batch_size=32):
     """
     :param index: of the image to test the algorithm.
     :return: the predicted axon and dendrite images.
@@ -59,7 +78,7 @@ def test_image(index, model_name, thresh_results=False, threshold=8, batch_size=
     predicted_label[rows-crop_size:rows, cols-crop_size:cols] = predicted_crops[k]
     k += 1
 
-    merged, _, axon, dendrite = get_images_from_train_label(x, y)
+    merged, actin, axon, dendrite = get_images_from_train_label(x, y)
     plt.title("Truth")
     plt.subplot(131)
     plt.imshow(merged)
@@ -67,6 +86,7 @@ def test_image(index, model_name, thresh_results=False, threshold=8, batch_size=
     plt.imshow(axon)
     plt.subplot(133)
     plt.imshow(dendrite)
+
     prediction, _, predicted_axon, predicted_dendrite = get_images_from_train_label(x, predicted_label)
 
     if thresh_results:
@@ -83,7 +103,7 @@ def test_image(index, model_name, thresh_results=False, threshold=8, batch_size=
     plt.subplot(133)
     plt.imshow(predicted_dendrite)
     plt.show()
-    return predicted_axon, predicted_dendrite
+    return actin, predicted_axon, predicted_dendrite
 
 
 def _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, callbacks):
@@ -100,7 +120,7 @@ def _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size,
 
 
 def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=1, batch_size=2, validation_split=0.3,
-                use_saved_weights=False, evaluate=False, show_example=False):
+                use_saved_weights=False, evaluate=True, show_example=True):
     # Load dataset.
     print("######## LOADING THE MODEL ###########")
     X_train, X_test, y_train, y_test = load_dataset(return_all=return_all, nb_examples=nb_examples)
@@ -119,10 +139,10 @@ def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=
     get_model = getattr(model_module, model_name)
 
     my_model = get_model(X_train.shape[1:])
-    # my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
     if use_saved_weights:
         my_model.load_weights(get_model_weights_path(model_name))
-    my_model.compile(optimizer="adam", loss='logcosh', metrics=["accuracy"])
+    # my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
+    my_model.compile(optimizer="adam", loss=own_loss_function, metrics=["accuracy"])
     # Best weights are saved after each epoch.
     checkpointer = ModelCheckpoint(filepath=get_model_weights_path(model_name), verbose=1, save_best_only=True)
     # Write output to a file after each epoch.

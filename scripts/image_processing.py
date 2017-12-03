@@ -60,11 +60,18 @@ def get_colored_images(actin, axon, dendrite, thresh=10):
 
 
 def merge_images(actin, axon, dendrite):
-    merged = np.copy(actin)
-    index_non_zeros_axon = np.where(axon != [0, 0, 0])
-    merged[index_non_zeros_axon] = axon[index_non_zeros_axon]
-    index_non_zeros_dendrite = np.where(dendrite != [0, 0, 0])
-    merged[index_non_zeros_dendrite] = dendrite[index_non_zeros_dendrite]
+    # merged = np.copy(actin)
+    # index_non_zeros_axon = np.where(axon != [0, 0, 0])
+    # merged[index_non_zeros_axon] = axon[index_non_zeros_axon]
+    # index_non_zeros_dendrite = np.where(dendrite != [0, 0, 0])
+    # merged[index_non_zeros_dendrite] = dendrite[index_non_zeros_dendrite]
+
+    merged = np.zeros(actin.shape)
+    merged[:, :, 0] = axon[:, :, 0]
+    merged[:, :, 2] = dendrite[:, :, 2]
+    zero_values = merged[:, :, 0] == 0
+    zero_values = np.logical_and(zero_values, merged[:, :, 2] == 0)
+    merged[zero_values] = actin[zero_values]
     return merged
 
 
