@@ -114,12 +114,16 @@ def save_dataset(nb_images=100, min_ones_ratio=0.2):
         crops_x, crops_y = get_all_crops(x, y)
         length = crops_x.shape[0]
         for j in range(0, length):
-            # We do not want to keep black crops, so we make sure there is some data in both train and label matrices.
+            # We do not want to keep too many black crops, so we make sure there is some data in both train and label
+            # matrices before taking the flips.
             if np.sum(crops_x[j]) > min_ones and np.sum(crops_y[j, :, :, 0]) > min_ones and np.sum(crops_y[j, :, :, 1]) > min_ones:
                 flips_x, flips_y = get_flips_images(crops_x[j], crops_y[j])
                 for k in range(0, 3):
                     train_set_x_orig.append(flips_x[k])
                     train_set_y_orig.append(flips_y[k])
+            else:
+                train_set_x_orig.append(crops_x[j])
+                train_set_y_orig.append(crops_y[j])
 
     # Save the created datasets to an hdf5 file.
     print("SAVING THE HDF5 FILE")
@@ -129,6 +133,21 @@ def save_dataset(nb_images=100, min_ones_ratio=0.2):
         dataset = f.create_dataset("y", (len(train_set_y_orig), crop_size, crop_size, 2))
         dataset[...] = np.array(train_set_y_orig)
     print("DONE")
+
+
+def load_dataset_generator(train_ratio=0.7):
+    with h5py.File(main_folder_path + "/test_1.hdf5", 'r') as f:
+        X = f['X'].value
+        y = f['y'].value
+        yield train_test_split(X, y, train_size=train_ratio)
+    with h5py.File(main_folder_path + "/test_2.hdf5", 'r') as f:
+        X = f['X'].value
+        y = f['y'].value
+        yield train_test_split(X, y, train_size=train_ratio)
+    with h5py.File(main_folder_path + "/test_3.hdf5", 'r') as f:
+        X = f['X'].value
+        y = f['y'].value
+        yield train_test_split(X, y, train_size=train_ratio)
 
 
 def load_dataset(return_all=True, nb_examples=100, train_ratio=0.7):

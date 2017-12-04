@@ -321,6 +321,26 @@ très élevée d'environ 45\%.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Analyse}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Contraintes}
+
+Les images fournies étaient en moyenne de haute résolution. Ainsi, les données
+avant augmentation pesaient déjà assez lourd, mais après augmentation nous
+avions un jeu de données d'environ 55 gigas. De plus, nous devions utiliser un
+ordinateur à distance afin d'avoir un GPU puissant, ce qui rendait les transferts
+de données compliqués (sans parler du fait que l'espace mémoire de l'ordinateur
+à distance était en grande partie utilisé). Cela a donc grandement ralenti le
+processus, étant donné que la sauvegarde du jeu de données entier après augmentation
+prenait un jour entier. Nous n'avons donc pas pu tester différentes augmentations
+sur l'ensemble des images d'origine. \\
+L'entraînement était aussi particulièrement long ; nous disposions de plus de
+110 000 matrices à traiter (après augmentation). Un entraînement sur 70\% des
+données (en enlevant une partie pour les tests), pendant 30 epochs prenait une
+dizaine d'heures.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Pistes d'amélioration}
+
 
 
 \end{document}

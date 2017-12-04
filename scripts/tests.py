@@ -21,7 +21,7 @@ def own_loss_function(y_true, y_pred):
     y_pred_not_penalized = boolean_mask(y_pred, mask_rest)
     y_true_not_penalized = boolean_mask(y_true, mask_rest)
 
-    return lambd * K.mean(K.square(y_pred_penalized - y_true_penalized), axis=-1) + \
+    return K.mean(K.square(lambd * (y_pred_penalized - y_true_penalized)), axis=-1) + \
            K.mean(K.square(y_pred_not_penalized - y_true_not_penalized), axis=-1)
 
 
@@ -120,7 +120,7 @@ def _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size,
 
 
 def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=1, batch_size=2, validation_split=0.3,
-                use_saved_weights=False, evaluate=True, show_example=True):
+                use_saved_weights=False, evaluate=True, show_example=False):
     # Load dataset.
     print("######## LOADING THE MODEL ###########")
     X_train, X_test, y_train, y_test = load_dataset(return_all=return_all, nb_examples=nb_examples)
@@ -139,6 +139,7 @@ def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=
     get_model = getattr(model_module, model_name)
 
     my_model = get_model(X_train.shape[1:])
+    # my_model = get_model((crop_size, crop_size, 1))
     if use_saved_weights:
         my_model.load_weights(get_model_weights_path(model_name))
     # my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
