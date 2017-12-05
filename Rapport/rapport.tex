@@ -215,7 +215,8 @@ permettant de supprimer du bruit, soit les pixels de très faible intensité :
 on définit un seuil entre 0 et 255 (dans notre cas, 10), et tous les pixels ayant
 une valeur inférieure à 10 sont ramenés à 0. On convertit ensuite les images en
 RGB, et on ne conserve des valeurs non nulles que pour un canal par image (vert pour
-l'actine, rouge pour les axones et bleu pour les dendrites).
+l'actine, rouge pour les axones et bleu pour les dendrites). Toutes les valeurs
+sont ramenées entre 0 et 1.
 
 \section{Images d'entrée}
 
@@ -245,7 +246,11 @@ ou les dendrites. Nous avions commencé en traitant simultanément les axones et
 dendrites (donc en ayant des labels de taille 224x224x2), mais il semblait
 que l'un des channels est souvent sur-appris alors que l'autre était délaissé.
 La fonction de perte devait retourner une valeur unique pour la matrice, donc
-le réseau n'avait aucun moyen de savoir quel channel devait être corrigé.
+le réseau n'avait aucun moyen de savoir quel channel devait être corrigé. \\
+Nous nous sommes demandés s'il était nécessaire de conserver des valeurs décimales
+pour les axones en dendrites, ou bien ne garder que des valeurs binaires comme le
+font les autres problèmes de segmentation d'image. Nous avons donc créé deux jeux
+de données, l'un binaire, l'autre non, afin de comparer les performances.
 
 \section{Prédiction d'une nouvelle image}
 
