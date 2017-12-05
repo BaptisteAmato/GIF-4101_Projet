@@ -78,5 +78,3 @@ def print_smallest_image_dimension():
         i += 1
     print(min_rows)
     print(min_cols)
-
-display_images_one_by_one(with_merged_image=True)

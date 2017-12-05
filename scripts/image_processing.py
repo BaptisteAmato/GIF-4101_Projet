@@ -82,26 +82,30 @@ def merge_images(actin, axon, dendrite, lim=0.05):
     return merged
 
 
-def get_contour_map(actin, axon, dendrite, thresh=0.3):
+def get_contour_map(actin, axon, dendrite, thresh=0.3, binary_masks=True):
+    """
+    Retrieve only the colored channel from each image, scale value between 0 and 1, and apply binary threshold if
+    binary_masks=True
+    :param actin:
+    :param axon:
+    :param dendrite:
+    :param thresh:
+    :param binary_masks:
+    :return:
+    """
     if actin is not None:
         actin = actin[:, :, 1] / 255
 
     if axon is not None:
         axon = axon[:, :, 0] / 255
-        # Make axons mask binary.
-        _, axon = cv2.threshold(axon, thresh, 255, cv2.THRESH_BINARY)
+        if binary_masks:
+            # Make axons mask binary.
+            _, axon = cv2.threshold(axon, thresh, 255, cv2.THRESH_BINARY)
 
     if dendrite is not None:
         dendrite = dendrite[:, :, 2] / 255
-        # Make dendrites mask binary.
-        _, dendrite = cv2.threshold(dendrite, thresh, 255, cv2.THRESH_BINARY)
+        if binary_masks:
+            # Make dendrites mask binary.
+            _, dendrite = cv2.threshold(dendrite, thresh, 255, cv2.THRESH_BINARY)
 
     return actin, axon, dendrite
-
-
-if __name__ == '__main__':
-    image = tifffile.imread('/media/maewanto/B498-74ED/Data_projet_apprentissage/2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif')
-    actin, axon, dendrite = split_tif_image(image)
-    _, actin, axon, dendrite = get_colored_images(actin, axon, dendrite)
-    plt.imshow(actin)
-    plt.show()

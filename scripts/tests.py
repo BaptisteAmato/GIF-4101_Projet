@@ -1,29 +1,7 @@
-import sys
-
-import keras.backend as K
-from tensorflow import boolean_mask, logical_and, logical_not, less, greater
 from keras.callbacks import ModelCheckpoint, CSVLogger
 from tensorflow.python.framework.errors_impl import ResourceExhaustedError
 
-from utils import *
-
-
-def own_loss_function(y_true, y_pred):
-    # The predicted values that are colored while the truth is black should be penalized.
-    lambd = 10
-    limit = 0.2
-    mask = less(y_true, limit)
-    mask2 = greater(y_pred, limit)
-    mask_to_penalize = logical_and(mask, mask2)
-    mask_rest = logical_not(mask_to_penalize)
-
-    y_pred_penalized = boolean_mask(y_pred, mask_to_penalize)
-    y_true_penalized = boolean_mask(y_true, mask_to_penalize)
-    y_pred_not_penalized = boolean_mask(y_pred, mask_rest)
-    y_true_not_penalized = boolean_mask(y_true, mask_rest)
-
-    return K.mean(K.square(lambd * (y_pred_penalized - y_true_penalized)), axis=-1) + \
-           K.mean(K.square(y_pred_not_penalized - y_true_not_penalized), axis=-1)
+from dataset import *
 
 
 def _predict(my_model, crops_x, batch_size):
@@ -38,14 +16,20 @@ def _predict(my_model, crops_x, batch_size):
     return _predict(my_model, crops_x, batch_size)
 
 
-def test_image(index, model_name, thresh_results=False, threshold=0.1, batch_size=32):
+def test_image(index, model_name, thresh_results=False, threshold=0.1, batch_size=32, binary_masks=True):
     """
-    :param index: of the image to test the algorithm.
-    :return: the predicted axon and dendrite images.
+    Compute prediction of an actin image
+    :param index:
+    :param model_name:
+    :param thresh_results:
+    :param threshold:
+    :param batch_size:
+    :param binary_masks:
+    :return:
     """
     print("########## LOADING THE IMAGE ##############")
-    x = np.load(folder_images_saving_train_x + "/" + str(index) + ".npy")
-    y = np.load(folder_images_saving_train_y + "/" + str(index) + ".npy")
+    x = np.load(get_folder_images_saving_train_x(binary_masks) + "/" + str(index) + ".npy")
+    y = np.load(get_folder_images_saving_train_y(binary_masks) + "/" + str(index) + ".npy")
     rows = x.shape[0]
     cols = x.shape[1]
     print(rows)
@@ -114,11 +98,11 @@ def _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size,
     return _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, callbacks)
 
 
-def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=1, batch_size=2, validation_split=0.3,
-                use_saved_weights=False, evaluate=True, show_example=False, channel='axons'):
+def train_model(model_name="model_yang", nb_examples=2, epochs=1, batch_size=2, validation_split=0.3,
+                use_saved_weights=False, evaluate=True, show_example=False, channel='axons', binary_masks=True):
     # Load dataset.
     print("######## LOADING THE MODEL ###########")
-    X_train, X_test, y_train, y_test = load_dataset(return_all=return_all, nb_examples=nb_examples, channel=channel)
+    X_train, X_test, y_train, y_test = load_dataset(nb_examples, binary_masks, channel)
 
     nb_train_examples = X_train.shape[0]
     nb_test_examples = X_test.shape[0]
@@ -136,12 +120,22 @@ def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=
     my_model = get_model(X_train.shape[1:])
     # my_model = get_model((crop_size, crop_size, 1))
     if use_saved_weights:
-        my_model.load_weights(get_model_weights_path(model_name))
-    # my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
-    my_model.compile(optimizer="adam", loss='binary_crossentropy', metrics=["accuracy"])
+        my_model.load_weights(get_model_weights_path(model_name, channel, binary_masks))
+
+    if binary_masks:
+        loss = 'binary_crossentropy'
+    else:
+        loss = 'mean_squared_error'
+    my_model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
     # my_model.compile(optimizer="adam", loss=own_loss_function, metrics=["accuracy"])
+
+    # Save the model to json.
+    model_json = my_model.to_json()
+    with open(get_model_path(model_name), "w") as json_file:
+        json_file.write(model_json)
+
     # Best weights are saved after each epoch.
-    checkpointer = ModelCheckpoint(filepath=get_model_weights_path(model_name), verbose=1, save_best_only=True)
+    checkpointer = ModelCheckpoint(filepath=get_model_weights_path(model_name, channel, binary_masks), verbose=1, save_best_only=True)
     # Write output to a file after each epoch.
     csv_logger = CSVLogger(main_folder_path + '/keras_log.csv', append=True, separator=';')
 
@@ -151,12 +145,7 @@ def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=
 
     # Load the best weights.
     print("######## LOADING THE BEST WEIGHTS ###########")
-    my_model.load_weights(get_model_weights_path(model_name))
-
-    # Save the model to json.
-    model_json = my_model.to_json()
-    with open(get_model_path(model_name), "w") as json_file:
-        json_file.write(model_json)
+    my_model.load_weights(get_model_weights_path(model_name, channel, binary_masks))
 
     if evaluate:
         # Evaluate the model.
@@ -172,20 +161,3 @@ def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=
         index = np.random.randint(nb_test_examples)
         test_image(index, model_name)
 
-
-if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        print("Usage: python main.py <number_of_images_to_load (integer)> <epochs (integer)> <batch_size (integer)>")
-        exit()
-    nb_images = sys.argv[1]
-    nb_epochs = sys.argv[2]
-    batch_size = sys.argv[1]
-    try:
-        nb_images = int(nb_images)
-        nb_epochs = int(nb_epochs)
-        batch_size = int(batch_size)
-    except ValueError:
-        print("Usage: python main.py <number_of_images_to_load (integer)> <epochs (integer)> <batch_size (integer)>")
-        exit()
-
-    train_model("model_yang", nb_images, nb_epochs, batch_size)

@@ -16,6 +16,12 @@ def _get_crop(train, label, i, j):
 
 
 def get_all_crops(train, label):
+    """
+    Returns all the crops of size (crop_size, crop_size) in the images
+    :param train:
+    :param label:
+    :return:
+    """
     rows = train.shape[0]
     cols = train.shape[1]
     nb_crops = math.ceil(rows / crop_size) * math.ceil(cols / crop_size)
@@ -45,7 +51,7 @@ def get_all_crops(train, label):
 
 def get_flips_images(train, label):
     """
-    Returns 3 tuples of images, each containing 3 flips of the original image.
+    Returns the images after three mirror operations
     """
     flips_train = np.zeros((3, train.shape[0], train.shape[1], train.shape[2]))
     flips_train[0] = np.flip(train, axis=1)

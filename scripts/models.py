@@ -1,6 +1,26 @@
 from keras.layers import BatchNormalization, Conv2D, UpSampling2D, Activation, Conv2DTranspose
 from keras.layers import MaxPooling2D, Dropout
 from keras.models import Sequential
+import keras.backend as K
+from tensorflow import boolean_mask, logical_and, logical_not, less, greater
+
+
+def own_loss_function(y_true, y_pred):
+    # The predicted values that are colored while the truth is black should be penalized.
+    lambd = 10
+    limit = 0.2
+    mask = less(y_true, limit)
+    mask2 = greater(y_pred, limit)
+    mask_to_penalize = logical_and(mask, mask2)
+    mask_rest = logical_not(mask_to_penalize)
+
+    y_pred_penalized = boolean_mask(y_pred, mask_to_penalize)
+    y_true_penalized = boolean_mask(y_true, mask_to_penalize)
+    y_pred_not_penalized = boolean_mask(y_pred, mask_rest)
+    y_true_not_penalized = boolean_mask(y_true, mask_rest)
+
+    return K.mean(K.square(lambd * (y_pred_penalized - y_true_penalized)), axis=-1) + \
+           K.mean(K.square(y_pred_not_penalized - y_true_not_penalized), axis=-1)
 
 
 def model_yang(input_shape):

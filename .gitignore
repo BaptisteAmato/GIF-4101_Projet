@@ -17,7 +17,6 @@ config.py
 scripts/.ipynb_checkpoints/*
 
 # generated data
-dataset/*
 *.hdf5
 
 # outputs
