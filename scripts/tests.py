@@ -1,7 +1,7 @@
 import sys
 
 import keras.backend as K
-from tensorflow import boolean_mask, logical_and, logical_not, equal, not_equal
+from tensorflow import boolean_mask, logical_and, logical_not, less, greater
 from keras.callbacks import ModelCheckpoint, CSVLogger
 from tensorflow.python.framework.errors_impl import ResourceExhaustedError
 
@@ -11,8 +11,9 @@ from utils import *
 def own_loss_function(y_true, y_pred):
     # The predicted values that are colored while the truth is black should be penalized.
     lambd = 10
-    mask = equal(y_true, 0)
-    mask2 = not_equal(y_pred, 0)
+    limit = 0.2
+    mask = less(y_true, limit)
+    mask2 = greater(y_pred, limit)
     mask_to_penalize = logical_and(mask, mask2)
     mask_rest = logical_not(mask_to_penalize)
 

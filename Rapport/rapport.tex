@@ -206,9 +206,10 @@ on a des images comme suit :
 \end{figure}
 
 Le pré-traitement commence par une égalisation de l'histogramme des intensités
-des images en niveaux de gris. On utilise ensuite deux opérations, une d'érosion
-afin de ne garder que du contenu autour des contours, et une de flou gaussien,
-afin d'obtenir des contours légèrement plus denses. \\
+des images en niveaux de gris, afin de pousser légèrement le contraste, et donc faire
+ressortir l'information la plus importante. On utilise ensuite deux opérations, une d'érosion
+afin de mieux délimiter les contours, et une de flou gaussien,
+afin de raffiner les continuités qui auront pu être perdues lors de l'érosion. \\
 On applique ensuite un \textit{thresholding} sur chaque image,
 permettant de supprimer du bruit, soit les pixels de très faible intensité :
 on définit un seuil entre 0 et 255 (dans notre cas, 10), et tous les pixels ayant

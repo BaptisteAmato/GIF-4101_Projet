@@ -13,7 +13,7 @@
 config.py
 
 # notebook
-main.ipynb
+*.ipynb
 .ipynb_checkpoints/*
 
 # generated data
