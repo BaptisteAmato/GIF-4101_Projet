@@ -78,32 +78,26 @@ def test_image(index, model_name, thresh_results=False, threshold=0.1, batch_siz
     predicted_label[rows-crop_size:rows, cols-crop_size:cols] = predicted_crops[k]
     k += 1
 
-    merged, actin, axon, dendrite = get_images_from_train_label(x, y)
+    actin, axon_or_dendrite = get_images_from_train_label(x, y)
     plt.title("Truth")
-    plt.subplot(131)
-    plt.imshow(merged)
-    plt.subplot(132)
-    plt.imshow(axon)
-    plt.subplot(133)
-    plt.imshow(dendrite)
+    plt.subplot(121)
+    plt.imshow(actin)
+    plt.subplot(122)
+    plt.imshow(axon_or_dendrite)
 
-    prediction, _, predicted_axon, predicted_dendrite = get_images_from_train_label(x, predicted_label)
+    actin, predicted_axon_or_dendrite = get_images_from_train_label(x, predicted_label)
 
     if thresh_results:
-        _, prediction = cv2.threshold(prediction, threshold, 255, cv2.THRESH_TOZERO)
-        _, predicted_axon = cv2.threshold(predicted_axon, threshold, 255, cv2.THRESH_TOZERO)
-        _, predicted_dendrite = cv2.threshold(predicted_dendrite, threshold, 255, cv2.THRESH_TOZERO)
+        _, predicted_axon_or_dendrite = cv2.threshold(predicted_axon_or_dendrite, threshold, 255, cv2.THRESH_TOZERO)
 
     plt.figure()
     plt.title("Prediction")
     plt.subplot(131)
-    plt.imshow(prediction)
+    plt.imshow(actin)
     plt.subplot(132)
-    plt.imshow(predicted_axon)
-    plt.subplot(133)
-    plt.imshow(predicted_dendrite)
+    plt.imshow(predicted_axon_or_dendrite)
     plt.show()
-    return actin, predicted_axon, predicted_dendrite
+    return actin, predicted_axon_or_dendrite
 
 
 def _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, callbacks):
@@ -120,10 +114,10 @@ def _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size,
 
 
 def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=1, batch_size=2, validation_split=0.3,
-                use_saved_weights=False, evaluate=True, show_example=False):
+                use_saved_weights=False, evaluate=True, show_example=False, channel='axons'):
     # Load dataset.
     print("######## LOADING THE MODEL ###########")
-    X_train, X_test, y_train, y_test = load_dataset(return_all=return_all, nb_examples=nb_examples)
+    X_train, X_test, y_train, y_test = load_dataset(return_all=return_all, nb_examples=nb_examples, channel=channel)
 
     nb_train_examples = X_train.shape[0]
     nb_test_examples = X_test.shape[0]
@@ -142,8 +136,8 @@ def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=
     # my_model = get_model((crop_size, crop_size, 1))
     if use_saved_weights:
         my_model.load_weights(get_model_weights_path(model_name))
-    # my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
-    my_model.compile(optimizer="adam", loss=own_loss_function, metrics=["accuracy"])
+    my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
+    # my_model.compile(optimizer="adam", loss=own_loss_function, metrics=["accuracy"])
     # Best weights are saved after each epoch.
     checkpointer = ModelCheckpoint(filepath=get_model_weights_path(model_name), verbose=1, save_best_only=True)
     # Write output to a file after each epoch.

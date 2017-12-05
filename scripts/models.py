@@ -124,14 +124,14 @@ def model_yang(input_shape):
         Dropout(0.3),
 
         # 224x224x32
-        Conv2D(2, (5, 5), strides=(1, 1), padding='same', name='conv19'),
+        Conv2D(1, (5, 5), strides=(1, 1), padding='same', name='conv19'),
         BatchNormalization(axis=3, name='bn19'),
         Activation('sigmoid'),
     ],
 
         name='MyModel')
 
-    # 224x224x2
+    # 224x224x1
 
     return model
 
@@ -257,13 +257,13 @@ def model_yang_with_conv2dtranspose(input_shape):
         Dropout(0.2),
 
         # 224x224x32
-        Conv2DTranspose(2, (5, 5), strides=(1, 1), padding='same', name='conv19'),
+        Conv2DTranspose(1, (5, 5), strides=(1, 1), padding='same', name='conv19'),
         BatchNormalization(axis=3, name='bn19'),
         Activation('sigmoid'),
     ],
 
         name='MyModel')
 
-    # 224x224x2
+    # 224x224x1
 
     return model

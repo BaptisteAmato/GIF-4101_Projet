@@ -28,35 +28,23 @@ def get_train_label_images(tif_image):
 
 
 def get_images_from_train_label(train, label):
-    merged = None
     if train is not None:
         rows = train.shape[0]
         cols = train.shape[1]
         actin = np.zeros((rows, cols, 3))
-        actin[:, :, 1] = np.squeeze(train)# * 255
+        actin[:, :, 1] = np.squeeze(train)
     else:
         actin = np.array([])
 
     if label is not None:
-        axon, dendrite = get_axon_dendrite_from_label(label)
+        rows = label.shape[0]
+        cols = label.shape[1]
+        axon_or_dendrite = np.zeros((rows, cols, 3))
+        axon_or_dendrite[:, :, 0] = np.squeeze(label[:, :, 0])
     else:
-        axon = np.array([])
-        dendrite = np.array([])
+        axon_or_dendrite = np.array([])
 
-    if train is not None and label is not None:
-        merged = merge_images(actin, axon, dendrite)
-
-    return merged, actin, axon, dendrite
-
-
-def get_axon_dendrite_from_label(label):
-    rows = label.shape[0]
-    cols = label.shape[1]
-    axon = np.zeros((rows, cols, 3))
-    axon[:, :, 0] = np.squeeze(label[:, :, 0])# * 255
-    dendrite = np.zeros((rows, cols, 3))
-    dendrite[:, :, 2] = np.squeeze(label[:, :, 1])# * 255
-    return axon, dendrite
+    return actin, axon_or_dendrite
 
 
 def save_train_label_images(n=10):
@@ -96,7 +84,7 @@ def get_dataset_h5py_path():
     return main_folder_path + "/dataset.hdf5"
 
 
-def save_dataset(nb_images=100, min_ones_ratio=0.2):
+def save_dataset(nb_images=100, min_ones_ratio=0.2, max_ones_ratio=0.8):
     """
     :param nb_images:
     :param min_ones_ratio: ratio of "1" in the entire matrix. Helps not saving empty matrices.
@@ -104,8 +92,10 @@ def save_dataset(nb_images=100, min_ones_ratio=0.2):
     """
     print("AUGMENTING THE DATA")
     min_ones = crop_size * min_ones_ratio
+    max_ones = crop_size * max_ones_ratio
     train_set_x_orig = []
-    train_set_y_orig = []
+    train_set_y_axon_orig = []
+    train_set_y_dendrite_orig = []
     for i in range(0, nb_images):
         if i % 10 == 0:
             print(i)
@@ -116,50 +106,47 @@ def save_dataset(nb_images=100, min_ones_ratio=0.2):
         for j in range(0, length):
             # We do not want to keep too many black crops, so we make sure there is some data in both train and label
             # matrices before taking the flips.
-            if np.sum(crops_x[j]) > min_ones and np.sum(crops_y[j, :, :, 0]) > min_ones and np.sum(crops_y[j, :, :, 1]) > min_ones:
+            if np.sum(crops_x[j]) > min_ones and np.sum(crops_y[j, :, :, 0]) > min_ones and np.sum(
+                    crops_y[j, :, :, 1]) > min_ones and np.sum(crops_x[j]) < max_ones and np.sum(
+                    crops_y[j, :, :, 0]) < max_ones and np.sum(crops_y[j, :, :, 1]) < max_ones:
                 flips_x, flips_y = get_flips_images(crops_x[j], crops_y[j])
                 for k in range(0, 3):
                     train_set_x_orig.append(flips_x[k])
-                    train_set_y_orig.append(flips_y[k])
+                    train_set_y_axon_orig.append(flips_y[k, :, :, 0])
+                    train_set_y_dendrite_orig.append(flips_y[k, :, :, 1])
             else:
                 train_set_x_orig.append(crops_x[j])
-                train_set_y_orig.append(crops_y[j])
+                train_set_y_axon_orig.append(crops_y[j, :, :, 0])
+                train_set_y_dendrite_orig.append(crops_y[j, :, :, 1])
 
     # Save the created datasets to an hdf5 file.
     print("SAVING THE HDF5 FILE")
     with h5py.File(get_dataset_h5py_path(), 'w') as f:
-        dataset = f.create_dataset("X", (len(train_set_x_orig), crop_size, crop_size, 1))
+        length = len(train_set_x_orig)
+        print("Length: " + str(length))
+        dataset = f.create_dataset("X", (length, crop_size, crop_size, 1))
         dataset[...] = np.array(train_set_x_orig)
-        dataset = f.create_dataset("y", (len(train_set_y_orig), crop_size, crop_size, 2))
-        dataset[...] = np.array(train_set_y_orig)
+        dataset = f.create_dataset("y_axon", (length, crop_size, crop_size, 1))
+        dataset[...] = np.expand_dims(np.array(train_set_y_axon_orig), axis=3)
+        dataset = f.create_dataset("y_dendrite", (length, crop_size, crop_size, 1))
+        dataset[...] = np.expand_dims(np.array(train_set_y_dendrite_orig), axis=3)
     print("DONE")
 
 
-def load_dataset_generator(train_ratio=0.7):
-    with h5py.File(main_folder_path + "/test_1.hdf5", 'r') as f:
-        X = f['X'].value
-        y = f['y'].value
-        yield train_test_split(X, y, train_size=train_ratio)
-    with h5py.File(main_folder_path + "/test_2.hdf5", 'r') as f:
-        X = f['X'].value
-        y = f['y'].value
-        yield train_test_split(X, y, train_size=train_ratio)
-    with h5py.File(main_folder_path + "/test_3.hdf5", 'r') as f:
-        X = f['X'].value
-        y = f['y'].value
-        yield train_test_split(X, y, train_size=train_ratio)
-
-
-def load_dataset(return_all=True, nb_examples=100, train_ratio=0.7):
+def load_dataset(return_all=True, nb_examples=100, train_ratio=0.7, channel='axons'):
     """
     :param return_all:
     :param nb_examples:
     :param train_ratio:
+    :param channel:
     :return: X_train, X_test, y_train, y_test
     """
     with h5py.File(get_dataset_h5py_path(), 'r') as f:
         X = f['X'].value
-        y = f['y'].value
+        if channel == 'axons':
+            y = f['y_axon'].value
+        else:
+            y = f['y_dendrite'].value
         if return_all:
             return train_test_split(X, y, train_size=train_ratio)
         else:

@@ -227,28 +227,40 @@ attend des images de même taille en entrée : nous avons donc découpé chacune
 images en \textit{crops} (petits carrés) de taille 224x224, correspondant à la taille
 des images en entrée du réseau \textbf{VGG16}, mentionné plus bas.
 
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.35]{"ex_crop"}
+\caption{Exemple de \textit{crop} d'une image d'entrée (actine seule)}
+\end{figure}
+
 \subsection{Contenu}
 
 Notre problème est une détection de contour, mais nous devons inclure la notion
 d'\textbf{intensité} dans nos matrices d'entrée (valeur allant de 0 à 255).
 Les images sont normalisées entre 0 et 1 ; une matrice d'entraînement sera de
 taille 224x224x1 (intensités de l'actine), et le label associé sera une matrice
-de taille 224x224x2, avec le premier channel correspondant aux axones et le second
-aux dendrites.
+de taille 224x224x1, selon si l'on souhaite entraîner le réseau sur les axones
+ou les dendrites. Nous avions commencé en traitant simultanément les axones et
+dendrites (donc en ayant des labels de taille 224x224x2), mais il semblait
+que l'un des channels est souvent sur-appris alors que l'autre était délaissé.
+La fonction de perte devait retourner une valeur unique pour la matrice, donc
+le réseau n'avait aucun moyen de savoir quel channel devait être corrigé.
 
 \section{Prédiction d'une nouvelle image}
 
-Là encore, il est nécessaire de procéder par \textit{crops} pour traiter l'image
-à traiter. Ainsi, chaque \textit{crop} sera associé à une image de prédiction,
-et l'image résultante sera reconstituée à partir de ces \textit{crops}. \\
-On décompose en deux images la prédiction reçue, afin d'obtenir le masque des axones
-et celui des dendrites, qui l'on peut alors supperposer à l'image d'actine originale.
+Là encore, il est nécessaire de procéder par \textit{crops} pour traiter une nouvelle
+image. Ainsi, chaque \textit{crop} sera associé à une image de prédiction,
+et l'image résultante sera reconstituée à partir de ces \textit{crops}. Le réseau
+de neurones n'a donc affaires qu'à des images de taille 224x2242z.
 
 \subsection{Augmentation des données}
 
 Nous avons, pour chaque \textit{crop}, ajouté des \textit{flips} (opérations "miroir")
 permettant d'avoir en sortie 4 nouvelles données (l'originale, la symmétrie horizontale,
-verticale et l'enchaînement des deux).
+verticale et l'enchaînement des deux). Ces opérations ne sont effectuées que lorsque
+l'image contient de l'information intéressante, c'est-à-dire si elle n'est pas trop
+noire ni trop colorée (en effet, dans ces cas, les opérations de symmétrie n'auraient
+que peu d'intérêt).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

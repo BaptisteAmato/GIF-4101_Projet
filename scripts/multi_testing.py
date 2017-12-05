@@ -8,7 +8,8 @@ def run_multi_tests(models_to_test):
             train_model(model['name'])
         else:
             train_model(model['name'], return_all=model['return_all'], nb_examples=model['nb_examples'], validation_split=model['validation_split'],
-                        epochs=model['epochs'], batch_size=model["batch_size"], use_saved_weights=model["use_saved_weights"])
+                        epochs=model['epochs'], batch_size=model["batch_size"], use_saved_weights=model["use_saved_weights"],
+                        channel=model['channel'])
 
 if __name__ == '__main__':
     models_to_test = [
@@ -19,7 +20,8 @@ if __name__ == '__main__':
             'validation_split': 0.3,
             'epochs': 50,
             'batch_size': 64,
-            'use_saved_weights': True
+            'use_saved_weights': True,
+            'channel': 'axons'
         }
     ]
 
