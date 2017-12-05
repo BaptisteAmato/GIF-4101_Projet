@@ -329,7 +329,21 @@ bien détourées. Afin de supprimer les faibles intensités, correspondant aux v
 
 Les résultats ci-dessus ont été obtenus avec le modèle issu de l'article de
 \textit{Yang et al.}, entraînés sur 500 images d'origine. On obtient un erreur
-très élevée d'environ 45\%.
+très élevée d'environ 45\%. \\ \\
+En modifiant la fonction de perte, on obtient de bien meilleurs résultats, jusqu'à
+sur-apprendre :
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{"result_overfit_truth"}
+\caption{Vérité : actine et axones}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{"result_overfit"}
+\caption{Prédiction sur les axones}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Analyse}
