@@ -7,14 +7,14 @@
 *.gz
 
 # idea
-.idea/*
+scripts/.idea/*
 
 # paths config file
 config.py
 
 # notebook
 *.ipynb
-.ipynb_checkpoints/*
+scripts/.ipynb_checkpoints/*
 
 # generated data
 dataset/*
