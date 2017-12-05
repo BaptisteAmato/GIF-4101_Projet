@@ -82,15 +82,19 @@ def merge_images(actin, axon, dendrite, lim=0.05):
     return merged
 
 
-def get_contour_map(actin, axon, dendrite):
+def get_contour_map(actin, axon, dendrite, thresh=0.3):
     if actin is not None:
         actin = actin[:, :, 1] / 255
 
     if axon is not None:
         axon = axon[:, :, 0] / 255
+        # Make axons mask binary.
+        _, axon = cv2.threshold(axon, thresh, 255, cv2.THRESH_BINARY)
 
     if dendrite is not None:
         dendrite = dendrite[:, :, 2] / 255
+        # Make dendrites mask binary.
+        _, dendrite = cv2.threshold(dendrite, thresh, 255, cv2.THRESH_BINARY)
 
     return actin, axon, dendrite
 

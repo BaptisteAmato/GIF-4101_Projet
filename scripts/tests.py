@@ -137,7 +137,8 @@ def train_model(model_name="model_yang", return_all=True, nb_examples=2, epochs=
     # my_model = get_model((crop_size, crop_size, 1))
     if use_saved_weights:
         my_model.load_weights(get_model_weights_path(model_name))
-    my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
+    # my_model.compile(optimizer="adam", loss='mean_squared_error', metrics=["accuracy"])
+    my_model.compile(optimizer="adam", loss='binary_crossentropy', metrics=["accuracy"])
     # my_model.compile(optimizer="adam", loss=own_loss_function, metrics=["accuracy"])
     # Best weights are saved after each epoch.
     checkpointer = ModelCheckpoint(filepath=get_model_weights_path(model_name), verbose=1, save_best_only=True)
