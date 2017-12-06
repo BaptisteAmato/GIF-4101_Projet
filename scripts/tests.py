@@ -16,7 +16,7 @@ def _predict(my_model, crops_x, batch_size):
     return _predict(my_model, crops_x, batch_size)
 
 
-def test_image(index, model_name, thresh_results=False, threshold=0.1, batch_size=32, binary_masks=True):
+def test_image(index, model_name, channel, binary_masks, thresh_results=False, threshold=0.1, batch_size=32):
     """
     Compute prediction of an actin image
     :param index:
@@ -37,7 +37,7 @@ def test_image(index, model_name, thresh_results=False, threshold=0.1, batch_siz
     print("########## CROPPING THE IMAGE ##############")
     crops_x, _ = get_all_crops(x, None)
     print(crops_x.shape)
-    my_model = load_model(model_name)
+    my_model = load_model(model_name, channel, binary_masks)
     print("########## PREDICTING THE CROPS ##############")
     predicted_crops = _predict(my_model, crops_x, batch_size)
     print("########## RECONSTITUTING THE IMAGE ##############")
@@ -63,14 +63,14 @@ def test_image(index, model_name, thresh_results=False, threshold=0.1, batch_siz
     predicted_label[rows-crop_size:rows, cols-crop_size:cols] = predicted_crops[k]
     k += 1
 
-    actin, axon_or_dendrite = get_images_from_train_label(x, y)
+    actin, axon_or_dendrite = get_images_from_train_label(x, y, channel)
     plt.title("Truth")
     plt.subplot(121)
     plt.imshow(actin)
     plt.subplot(122)
     plt.imshow(axon_or_dendrite)
 
-    actin, predicted_axon_or_dendrite = get_images_from_train_label(x, predicted_label)
+    actin, predicted_axon_or_dendrite = get_images_from_train_label(x, predicted_label, channel)
 
     if thresh_results:
         _, predicted_axon_or_dendrite = cv2.threshold(predicted_axon_or_dendrite, threshold, 255, cv2.THRESH_TOZERO)
