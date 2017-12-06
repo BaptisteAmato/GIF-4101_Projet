@@ -109,3 +109,16 @@ def get_contour_map(actin, axon, dendrite, binary_masks, thresh=0.1):
             _, dendrite = cv2.threshold(dendrite, thresh, 1, cv2.THRESH_BINARY)
 
     return actin, axon, dendrite
+
+
+def keep_only_actin_mask_on_prediction(actin, prediction):
+    """
+    Set to black all the parts of the predicted image (axons or dendrites) that are black on the original image
+    :param actin:
+    :param prediction:
+    :return:
+    """
+    black_mask = np.where(actin[:, :, 1] == 0)
+    masked_prediction = prediction.copy()
+    masked_prediction[black_mask] = 0
+    return masked_prediction

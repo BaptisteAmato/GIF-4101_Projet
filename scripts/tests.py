@@ -2,6 +2,7 @@ from keras.callbacks import ModelCheckpoint, CSVLogger
 from tensorflow.python.framework.errors_impl import ResourceExhaustedError
 
 from dataset import *
+from image_processing import *
 
 
 def _predict(my_model, crops_x, batch_size):
@@ -16,7 +17,7 @@ def _predict(my_model, crops_x, batch_size):
     return _predict(my_model, crops_x, batch_size)
 
 
-def test_image(index, model_name, channel, binary_masks, thresh_results=False, threshold=0.1, batch_size=32):
+def test_image(index, model_name, channel, binary_masks, thresh_results=False, threshold=0.1, batch_size=32, apply_actin_mask=True):
     """
     Compute prediction of an actin image
     :param index:
@@ -74,6 +75,9 @@ def test_image(index, model_name, channel, binary_masks, thresh_results=False, t
 
     if thresh_results:
         _, predicted_axon_or_dendrite = cv2.threshold(predicted_axon_or_dendrite, threshold, 255, cv2.THRESH_TOZERO)
+
+    if apply_actin_mask:
+        predicted_axon_or_dendrite = keep_only_actin_mask_on_prediction(actin, predicted_axon_or_dendrite)
 
     plt.figure()
     plt.title("Prediction")

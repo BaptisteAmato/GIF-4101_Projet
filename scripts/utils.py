@@ -20,16 +20,23 @@ def get_images_from_train_label(train, label, channel):
         actin = np.array([])
 
     if label is not None:
+        print("+++++++")
+        print(label.shape)
+        print("+++++++")
         rows = label.shape[0]
         cols = label.shape[1]
+        # Axon is saved in channel 0, dendrite is saved in channel 1.
+        # Axon's color is red (non-zero channel: 0), dendrite is blue (non-zero channel: 2)
         if channel == 'axons':
+            axon_or_dendrite_index = 0
             color_index = 0
         elif channel == 'dendrites':
+            axon_or_dendrite_index = 1
             color_index = 2
         else:
             raise ValueError('channel attribute must either be "axons" or "dendrites"')
         axon_or_dendrite = np.zeros((rows, cols, 3))
-        axon_or_dendrite[:, :, color_index] = np.squeeze(label[:, :, 0])
+        axon_or_dendrite[:, :, color_index] = np.squeeze(label[:, :, axon_or_dendrite_index])
     else:
         axon_or_dendrite = np.array([])
 
