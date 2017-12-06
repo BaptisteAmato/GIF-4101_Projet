@@ -97,7 +97,6 @@ def get_contour_map(actin, axon, dendrite, binary_masks, thresh=0.1):
         actin = actin[:, :, 1] / 255
 
     if axon is not None:
-        # axon = axon.astype(np.uint8)
         axon = axon[:, :, 0] / 255
         if binary_masks:
             # Make axons mask binary.

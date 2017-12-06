@@ -124,10 +124,11 @@ def train_model(model_name="model_yang", nb_examples=2, epochs=1, batch_size=2, 
 
     if binary_masks:
         loss = 'binary_crossentropy'
+        metrics = ['binary_accuracy']
     else:
         loss = 'mean_squared_error'
-    my_model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
-    # my_model.compile(optimizer="adam", loss=own_loss_function, metrics=["accuracy"])
+        metrics = ['accuracy']
+    my_model.compile(optimizer="adam", loss=loss, metrics=metrics)
 
     # Save the model to json.
     model_json = my_model.to_json()
