@@ -33,10 +33,10 @@ def get_train_label_images(tif_image, binary_masks):
     return train, test
 
 
-def save_train_label_images(n=10, binary_masks=True):
+def save_train_label_images(number_of_images=10, binary_masks=True):
     """
     Saves the images after processing, as .npy files
-    :param n:
+    :param number_of_images:
     :param binary_masks:
     :return:
     """
@@ -49,7 +49,7 @@ def save_train_label_images(n=10, binary_masks=True):
         os.makedirs(get_folder_images_saving_train_y(binary_masks))
 
     generator = get_files_path_generator()
-    for i in range(0, n):
+    for i in range(0, number_of_images):
         print(i)
         file_path = next(generator)
         tif_image = tifffile.imread(file_path)
