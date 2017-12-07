@@ -312,6 +312,14 @@ en local le modèle déjà appris et voir ce qu'il donne sur différentes images
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Résultats}
 
+\section{Post-traitement}
+
+Le but est d'obtenir des masques d'axones et dendrites sur une image d'actine.
+On ne s'intéresse donc qu'aux valeurs non nulles de l'image d'origine, c'est
+pourquoi nous appliquons un masque sur les prédictions afin de n'avoir que du
+contenu pouvant être superposé àl'actine d'origine (en effet, dans la plupart
+des prédictions, le fond est légèrement coloré, mais cela nous importe peu).
+
 \section{Premiers résultats}
 
 Nos premiers résultats ont montré que notre réseau avait du mal à distinguer

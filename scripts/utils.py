@@ -20,9 +20,6 @@ def get_images_from_train_label(train, label, channel):
         actin = np.array([])
 
     if label is not None:
-        print("+++++++")
-        print(label.shape)
-        print("+++++++")
         rows = label.shape[0]
         cols = label.shape[1]
         # Axon is saved in channel 0, dendrite is saved in channel 1.
