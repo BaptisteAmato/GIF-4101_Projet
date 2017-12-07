@@ -232,7 +232,9 @@ des images en entrée du réseau \textbf{VGG16}, mentionné plus bas.
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.35]{"ex_crop"}
-\caption{Exemple de \textit{crop} d'une image d'entrée (actine seule)}
+\caption{Exemple de \textit{crop} d'une image d'entrée (actine seule). La faible
+résolution n'est dûe à aucun redimmensionnement de l'image d'origine, il s'agit
+seulement de la pauvre qualité d'une capture d'écran}
 \end{figure}
 
 \subsection{Contenu}
@@ -379,6 +381,13 @@ décimales entre 0 et 1 ou bien des valeurs binaires pour les masques des axones
 et des dendrites. \\
 En revanche, il est clair que le réseau donne de bien meilleurs résultats lorsque
 les axones et dendrites sont prédits séparemment.
+
+\section{Temps d'entraînement}
+
+Il s'avère que les résultats ci-dessus peuvent être obtenus assez rapidement, après
+seulement quelques \textit{epochs}. En fait, le taux d'erreur est de moins de 25\%
+à la fin du premier \textit{epoch}, puis stagne autour de 17-18\% après environ 5
+\textit{epochs}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

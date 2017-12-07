@@ -3,6 +3,7 @@ from tensorflow.python.framework.errors_impl import ResourceExhaustedError
 
 from dataset import *
 from image_processing import *
+from models import own_loss_function
 
 
 def _predict(my_model, crops_x, batch_size):
@@ -130,7 +131,8 @@ def train_model(model_name="model_yang", nb_examples=2, epochs=1, batch_size=2, 
         loss = 'binary_crossentropy'
         metrics = ['binary_accuracy']
     else:
-        loss = 'mean_squared_error'
+        # loss = 'mean_squared_error'
+        loss = own_loss_function
         metrics = ['accuracy']
     my_model.compile(optimizer="adam", loss=loss, metrics=metrics)
 
