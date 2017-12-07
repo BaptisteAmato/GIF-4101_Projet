@@ -64,10 +64,6 @@ def get_dataset_h5py_path(binary_masks):
     else:
         path = main_folder_path + "/dataset_non_binary.hdf5"
 
-    # Create folder if not exist.
-    if not os.path.exists(path):
-        os.makedirs(path)
-
     return path
 
 
