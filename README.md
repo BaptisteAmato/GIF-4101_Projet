@@ -12,22 +12,4 @@ Detect axons and dendrites on an actine image (channel 1)
 ### TODO
 You need to create a config.py file, and define two variables in it:
    - main_folder_path: location of the original images and will be generated the dataset
-   - output_folder_path: folder in which the model's weights and structure will ge saved
 
-### Server
-Folder: "Projet détection axones dendrites"
-Connexion via VPN: https://vpn.ulaval.ca/ 
-Adress: \\132.203.179.88\collaborators\GIF
-User: GIF
-Password: 3O55f:
-
-### Links of interest:
-https://stanfordmlgroup.github.io/projects/chexnet/
-https://arxiv.org/pdf/1705.09759.pdf
-https://arxiv.org/pdf/1511.00561.pdf
-https://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Yang_Object_Contour_Detection_CVPR_2016_paper.pdf
-https://arxiv.org/pdf/1711.04340.pdf
-https://arxiv.org/pdf/1708.03431.pdf
-
-### Caffe installation
-https://gist.github.com/arundasan91/b432cb011d1c45b65222d0fac5f9232c
