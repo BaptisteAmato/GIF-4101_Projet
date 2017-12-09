@@ -79,7 +79,6 @@ original_data = main_folder_path + '/original_data'
 folder_models = main_folder_path + '/models'
 folder_models_weights = main_folder_path + '/models_weights'
 model_weights_suffix = '_weights.hdf5'
-crop_size = 224
+crop_size = 448
 
-# Image example: 2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif
 
