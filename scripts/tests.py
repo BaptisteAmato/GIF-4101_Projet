@@ -1,9 +1,8 @@
-from keras.callbacks import ModelCheckpoint, CSVLogger
+from keras.callbacks import ModelCheckpoint, CSVLogger, EarlyStopping
 from tensorflow.python.framework.errors_impl import ResourceExhaustedError
 
 from dataset import *
 from image_processing import *
-from models import own_loss_function
 
 
 def _predict(my_model, crops_x, batch_size):
@@ -104,10 +103,10 @@ def _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size,
 
 
 def train_model(model_name="model_yang", nb_examples=2, epochs=1, batch_size=2, validation_split=0.3,
-                use_saved_weights=False, evaluate=True, show_example=False, channel='axons', binary_masks=True):
+                use_saved_weights=False, evaluate=True, show_example=False, channel='axons', binary_masks=True, train_test_splitting=True):
     # Load dataset.
     print("######## LOADING THE MODEL ###########")
-    X_train, X_test, y_train, y_test = load_dataset(nb_examples, binary_masks, channel)
+    X_train, X_test, y_train, y_test = load_dataset(nb_examples, binary_masks, channel, train_test_splitting=train_test_splitting)
 
     nb_train_examples = X_train.shape[0]
     nb_test_examples = X_test.shape[0]
@@ -131,8 +130,7 @@ def train_model(model_name="model_yang", nb_examples=2, epochs=1, batch_size=2, 
         loss = 'binary_crossentropy'
         metrics = ['binary_accuracy']
     else:
-        # loss = 'mean_squared_error'
-        loss = own_loss_function
+        loss = 'mean_squared_error'
         metrics = ['accuracy']
     my_model.compile(optimizer="adam", loss=loss, metrics=metrics)
 
@@ -141,28 +139,33 @@ def train_model(model_name="model_yang", nb_examples=2, epochs=1, batch_size=2, 
     with open(get_model_path(model_name), "w") as json_file:
         json_file.write(model_json)
 
-    # Best weights are saved after each epoch.
+    # Best weights are saved if validation_loss decreases.
     checkpointer = ModelCheckpoint(filepath=get_model_weights_path(model_name, channel, binary_masks), verbose=1, save_best_only=True)
     # Write output to a file after each epoch.
     csv_logger = CSVLogger(main_folder_path + '/keras_log.csv', append=True, separator=';')
+    # Early stopping when validation_loss does not decrease anymore.
+    early_stopping = EarlyStopping(monitor='val_loss', patience=2)
 
     # Run the model.
     print("######## RUNNING THE MODEL ###########")
-    _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, [checkpointer, csv_logger])
+    _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, [checkpointer, csv_logger, early_stopping])
 
     # Load the best weights.
     print("######## LOADING THE BEST WEIGHTS ###########")
     my_model.load_weights(get_model_weights_path(model_name, channel, binary_masks))
 
-    if evaluate:
+    if train_test_splitting and evaluate:
         # Evaluate the model.
         print("######## EVALUATING THE MODEL ###########")
         preds = my_model.evaluate(x=X_test, y=y_test)
         print()
         print("Loss = " + str(preds[0]))
         print("Test Accuracy = " + str(preds[1]))
+        with open(get_model_evaluation_path(model_name), 'w') as f:
+            f.write("Loss = " + str(preds[0]) + '\n')
+            f.write("Test Accuracy = " + str(preds[1]) + '\n')
 
-    if show_example:
+    if train_test_splitting and show_example:
         # Test on image.
         print("######## TESTING THE MODEL ON AN IMAGE ###########")
         index = np.random.randint(nb_test_examples)

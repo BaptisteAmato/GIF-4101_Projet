@@ -9,7 +9,7 @@ def get_files_path_generator():
     Generator of original tif files' path
     :return:
     """
-    for subdir, dirs, files in os.walk(main_folder_path):
+    for subdir, dirs, files in os.walk(original_data):
         for file in files:
             filename, file_extension = os.path.splitext(file)
             if file_extension == ".tif":
@@ -110,10 +110,11 @@ def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, max_ones_ratio=0.8
     print("DONE")
 
 
-def load_dataset(nb_examples, binary_masks, channel, train_ratio=0.7):
+def load_dataset(nb_examples, binary_masks, channel, train_test_splitting=True, train_ratio=0.7):
     """
     Returns the train and test datasets
     :param nb_examples:
+    :param train_test_split:
     :param train_ratio:
     :param channel:
     :param binary_masks:
@@ -127,7 +128,14 @@ def load_dataset(nb_examples, binary_masks, channel, train_ratio=0.7):
             y = f['y_dendrite'].value
         else:
             raise ValueError('channel attribute must either be "axons" or "dendrites"')
-        if nb_examples is None:
-            return train_test_split(X, y, train_size=train_ratio)
+        if train_test_splitting:
+            if nb_examples is None:
+                return train_test_split(X, y, train_size=train_ratio)
+            else:
+                return train_test_split(X[:nb_examples], y[:nb_examples], train_size=train_ratio)
         else:
-            return train_test_split(X[:nb_examples], y[:nb_examples], train_size=train_ratio)
+            empty_array = np.array([])
+            if nb_examples is None:
+                return X, empty_array, y, empty_array
+            else:
+                return X[:nb_examples], empty_array, y[:nb_examples], empty_array

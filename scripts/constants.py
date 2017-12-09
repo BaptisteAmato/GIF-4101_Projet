@@ -58,6 +58,14 @@ def get_model_path(model_name):
     return folder_models + "/" + model_name + ".json"
 
 
+def get_model_evaluation_path(model_name):
+    # Create folder if not exist.
+    if not os.path.exists(folder_models):
+        os.makedirs(folder_models)
+
+    return folder_models + "/" + model_name + ".txt"
+
+
 def get_dataset_h5py_path(binary_masks):
     if binary_masks:
         path = main_folder_path + "/dataset_binary.hdf5"
@@ -67,6 +75,7 @@ def get_dataset_h5py_path(binary_masks):
     return path
 
 
+original_data = main_folder_path + '/original_data'
 folder_models = main_folder_path + '/models'
 folder_models_weights = main_folder_path + '/models_weights'
 model_weights_suffix = '_weights.hdf5'

@@ -1,3 +1,4 @@
+from dataset import get_files_path_generator
 from utils import *
 
 
@@ -65,16 +66,25 @@ def print_smallest_image_dimension():
     N = print_number_original_files()
     min_rows = np.inf
     min_cols = np.inf
+    min_rows_img = ""
+    min_cols_img = ""
     i = 0
     for file_path in get_files_path_generator():
-        print(str(i + 1) + "/" + str(N))
+        if i % 10 == 0:
+            print(str(i + 1) + "/" + str(N))
         image = tifffile.imread(file_path)
         # Remove number of channels from shape
         shape = image.shape[1:]
         if min_rows > shape[0]:
             min_rows = shape[0]
+            min_rows_img = file_path
         if min_cols > shape[1]:
             min_cols = shape[1]
+            min_cols_img = file_path
         i += 1
     print(min_rows)
+    print(min_rows_img)
     print(min_cols)
+    print(min_cols_img)
+
+print_smallest_image_dimension()
