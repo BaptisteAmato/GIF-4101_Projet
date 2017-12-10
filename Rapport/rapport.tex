@@ -345,7 +345,7 @@ bien détourées. Afin de supprimer les faibles intensités, correspondant aux v
 Les résultats ci-dessus ont été obtenus avec le modèle issu de l'article de
 \textit{Yang et al.}, entraînés sur 500 images d'origine. On obtient un erreur
 très élevée d'environ 45\%. \\ \\
-En modifiant la fonction de perte, on obtient de bien meilleurs résultats, jusqu'à
+En modifiant la fonction de perte, on obtient de meilleurs résultats, jusqu'à
 sur-apprendre :
 
 \begin{figure}[H]
@@ -362,6 +362,10 @@ sur-apprendre :
 
 \section{Cas bien prédits}
 
+Nous avons beaucoup plus de mal à ne pas sur-apprendre les axones, étant donné
+que le masque de ceux-ci est souvent très proche de l'actine. On obtient de bons
+résultats avec les dendrites, comme suit :
+
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.5]{"good_result_truth"}
@@ -371,6 +375,42 @@ sur-apprendre :
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.8]{"good_result"}
+\caption{Prédiction sur les dendrites}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{"2_truth"}
+\caption{Vérité : actine et dendrites}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{"2_result"}
+\caption{Prédiction sur les dendrites}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{"91_truth"}
+\caption{Vérité : actine et dendrites}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{"91_result"}
+\caption{Prédiction sur les dendrites}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{"397_truth"}
+\caption{Vérité : actine et dendrites}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{"397_result"}
 \caption{Prédiction sur les dendrites}
 \end{figure}
 
