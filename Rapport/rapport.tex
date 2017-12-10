@@ -1,6 +1,7 @@
 \documentclass{report}
 \usepackage[utf8]{inputenc} % force the use of utf8
 \usepackage[T1]{fontenc} % font encoding, allows accents
+\usepackage{pslatex} %font (ae/pslatex)
 \usepackage[papersize={21cm,29.7cm},top= 2.5cm,bottom=2.5cm, inner=2.5cm, outer=2.5cm]{geometry} % page formatting
 \usepackage{graphicx} % images management
 \usepackage{wrapfig} % floating images
@@ -155,7 +156,7 @@ données d’images déjà marquées : il s'agit donc un problème d’apprentis
 \section{Jeu de données}
 
 Le jeu de données initial comprend 1024 images au format \textit{.tiff}, ayant
-chacune 3 canaux : un pour l'actine (la protéine d'intérêt), un pour les axones,
+chacune trois canaux : un pour l'actine (la protéine d'intérêt), un pour les axones,
 et un pour les dendrites. \\
 Ce jeu de données étant relativement petit pour un apprentissage par réseau neuronal,
 nous allons utiliser des méthodes d'augmentation comme les symétries, rotations, ou
@@ -172,7 +173,7 @@ démontré une capacité de détection de contour impressionnante : \textit{Obje
  Detection with a Fully Convolutional Encoder-Decoder Network}, par \textbf{Yang
  \textit{et al.}}. Nous pensons donc nous orienter vers un réseau de neurones profond
 avec une architecture \textit{Encoder-Decoder} ; cette architecture est aussi
-utilisé dans les traductions de textes (séquences en entrée et sortie). Des résultats
+utilisée dans les traductions de textes (séquences en entrée et sortie). Des résultats
 probants concernant de la segmentation d'images sont présentés dans l'article
 \textit{Iterative Deep Convolutional Encoder-Decoder Network for Medical Image
  Segmentation}, par \textbf{Jung Uk Kim, Hak Gu Kim, et Yong Man Ro}, suivant une
@@ -182,8 +183,8 @@ Les principes de segmentation d'image sont clairement expliqués dans l'article
  \textit{et al.}}. \\
 Concernant l’augmentation de notre jeu de données, nous aurons une approche
 classique par traitement d’image traditionnel et dans un second temps, nous
-explorerons la possibilité d'utiliser un Generative Adversarial Network pour l’augmentation
-des données, comme précisé dans l'article\textit{Biomedical Data Augmentation Using
+explorerons la possibilité d'utiliser un "Generative Adversarial Network" pour l’augmentation
+des données, tel qu'il est montré dans l'article\textit{Biomedical Data Augmentation Using
 Generative Adversarial Neural Networks. Artificial Neural Networks and Machine
 Learning} par \textbf{Calimeri, F.
  \textit{et al.}}.
@@ -196,25 +197,25 @@ Learning} par \textbf{Calimeri, F.
 
 Une image du jeu de données fournit contient trois canaux, pour l'actine, les axones
 et les dendrites. Nous séparons donc le \textit{.tiff} afin d'obtenir trois images,
-avec l'actine en vert, les axones en rougeet les dendrites en bleu. Après traitements,
+avec l'actine en vert, les axones en rouge et les dendrites en bleu. Après traitements,
 on a des images comme suit :
 
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.35]{"ex_mask"}
-\caption{En haut, un triplet actine-axone-dendrite, et en bas les mêmes images une fois le masque appliqué}
+\caption{En haut, un triplet actine-axone-dendrite et en bas les mêmes images une fois le masque appliqué}
 \end{figure}
 
 Le pré-traitement commence par une égalisation de l'histogramme des intensités
-des images en niveaux de gris, afin de pousser légèrement le contraste, et donc faire
+des images en niveaux de gris, afin de pousser légèrement le contraste et donc faire
 ressortir l'information la plus importante. On utilise ensuite deux opérations, une d'érosion
-afin de mieux délimiter les contours, et une de flou gaussien,
+afin de mieux délimiter les contours et une de flou gaussien,
 afin de raffiner les continuités qui auront pu être perdues lors de l'érosion. \\
 On applique ensuite un \textit{thresholding} sur chaque image,
 permettant de supprimer du bruit, soit les pixels de très faible intensité :
 on définit un seuil entre 0 et 255 (dans notre cas, 10), et tous les pixels ayant
 une valeur inférieure à 10 sont ramenés à 0. On convertit ensuite les images en
-RGB, et on ne conserve des valeurs non nulles que pour un canal par image (vert pour
+RGB et on conserve des valeurs non nulles que pour un canal par image (vert pour
 l'actine, rouge pour les axones et bleu pour les dendrites). Toutes les valeurs
 sont ramenées entre 0 et 1.
 
@@ -224,7 +225,7 @@ sont ramenées entre 0 et 1.
 
 Les images en entrée sont toutes de dimensions différentes, mais de même résolution.
 Il est donc nécessaire de conserver ces résolutions (ayant un sens physique) en
-n'effectuant aucun redimmensionnement. Le problème est que le réseau de neurones
+n'effectuant aucun redimensionnement. Le problème est que le réseau de neurones
 attend des images de même taille en entrée : nous avons donc découpé chacune des
 images en \textit{crops} (petits carrés) de taille 224x224, correspondant à la taille
 des images en entrée du réseau \textbf{VGG16}, mentionné plus bas.
@@ -233,7 +234,7 @@ des images en entrée du réseau \textbf{VGG16}, mentionné plus bas.
 \centering
 \includegraphics[scale=0.35]{"ex_crop"}
 \caption{Exemple de \textit{crop} d'une image d'entrée (actine seule). La faible
-résolution n'est dûe à aucun redimmensionnement de l'image d'origine, il s'agit
+résolution n'est pas due à redimensionnement de l'image d'origine mais
 seulement de la pauvre qualité d'une capture d'écran}
 \end{figure}
 
@@ -246,9 +247,9 @@ taille 224x224x1 (intensités de l'actine), et le label associé sera une matric
 de taille 224x224x1, selon si l'on souhaite entraîner le réseau sur les axones
 ou les dendrites. Nous avions commencé en traitant simultanément les axones et
 dendrites (donc en ayant des labels de taille 224x224x2), mais il semblait
-que l'un des channels est souvent sur-appris alors que l'autre était délaissé.
+que l'un des canaux est souvent sur-appris alors que l'autre était délaissé.
 La fonction de perte devait retourner une valeur unique pour la matrice, donc
-le réseau n'avait aucun moyen de savoir quel channel devait être corrigé. \\
+le réseau n'avait aucun moyen de savoir quel canal devait être corrigé. \\
 Nous nous sommes demandés s'il était nécessaire de conserver des valeurs décimales
 pour les axones en dendrites, ou bien ne garder que des valeurs binaires comme le
 font les autres problèmes de segmentation d'image. Nous avons donc créé deux jeux
@@ -257,28 +258,26 @@ de données, l'un binaire, l'autre non, afin de comparer les performances.
 \section{Prédiction d'une nouvelle image}
 
 Là encore, il est nécessaire de procéder par \textit{crops} pour traiter une nouvelle
-image. Ainsi, chaque \textit{crop} sera associé à une image de prédiction,
+image. Ainsi, chaque \textit{crop} sera associé à une image de prédiction
 et l'image résultante sera reconstituée à partir de ces \textit{crops}. Le réseau
 de neurones n'a donc affaires qu'à des images de taille 224x2242z.
 
 \subsection{Augmentation des données}
 
 Nous avons, pour chaque \textit{crop}, ajouté des \textit{flips} (opérations "miroir")
-permettant d'avoir en sortie 4 nouvelles données (l'originale, la symmétrie horizontale,
+permettant d'avoir quatre nouvelles données en sortie (l'originale, la symmétrie horizontale,
 verticale et l'enchaînement des deux). Ces opérations ne sont effectuées que lorsque
 l'image contient de l'information intéressante, c'est-à-dire si elle n'est pas trop
-noire ni trop colorée (en effet, dans ces cas, les opérations de symmétrie n'auraient
+noire ni trop colorée (en effet, dans ces cas, les opérations de symétrie n'auraient
 que peu d'intérêt).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Réseau de neurones}
 
-Nous utilisons la librairie \textit{Keras} avec un back-end en \textit{TensorFlow}.
-L'architecture sera celle présentée dans l'article de recherche \textit{Object Contour
+Nous utilisons la librairie \textit{Keras} avec un back-end en \textit{TensorFlow}. L'architecture sera celle présentée dans l'article de recherche \textit{Object Contour
 Detection with a Fully Convolutional Encoder-Decoder Network}, par \textbf{Yang
-\textit{et al.}} : la première parte du réseau est l'encodeur, basé sur l'architecture
-du réseau \textbf{VGG16}, en s'arrêtant juste avant le \textit{Fully Connected layer}.
+\textit{et al.}} : la première partie du réseau est l'encodeur, basé sur l'architecture du réseau \textbf{VGG16}, en s'arrêtant juste avant le \textit{Fully Connected layer}.
 Ensuite, le décodeur est celui décrit par l'article, permettant de reconstituer
 une image de la taille d'origine avec des opérations de \textit{déconvolution},
 qui en \textit{Keras} se font grâce à l'opération \textit{UpSampling} suivie d'une
@@ -319,7 +318,7 @@ en local le modèle déjà appris et voir ce qu'il donne sur différentes images
 Le but est d'obtenir des masques d'axones et dendrites sur une image d'actine.
 On ne s'intéresse donc qu'aux valeurs non nulles de l'image d'origine, c'est
 pourquoi nous appliquons un masque sur les prédictions afin de n'avoir que du
-contenu pouvant être superposé àl'actine d'origine (en effet, dans la plupart
+contenu pouvant être superposé à l'actine d'origine (en effet, dans la plupart
 des prédictions, le fond est légèrement coloré, mais cela nous importe peu).
 
 \section{Premiers résultats}
@@ -343,7 +342,7 @@ bien détourées. Afin de supprimer les faibles intensités, correspondant aux v
 \end{figure}
 
 Les résultats ci-dessus ont été obtenus avec le modèle issu de l'article de
-\textit{Yang et al.}, entraînés sur 500 images d'origine. On obtient un erreur
+\textit{Yang et al.}, entraînés sur 500 images d'origine. On obtient une erreur
 très élevée d'environ 45\%. \\ \\
 En modifiant la fonction de perte, on obtient de meilleurs résultats, jusqu'à
 sur-apprendre :
@@ -420,13 +419,13 @@ Il s'avère que les prédictions sont semblables, que nous gardions des intensit
 décimales entre 0 et 1 ou bien des valeurs binaires pour les masques des axones
 et des dendrites. \\
 En revanche, il est clair que le réseau donne de bien meilleurs résultats lorsque
-les axones et dendrites sont prédits séparemment.
+les axones et dendrites sont prédites séparément.
 
 \section{Temps d'entraînement}
 
 Il s'avère que les résultats ci-dessus peuvent être obtenus assez rapidement, après
 seulement quelques \textit{epochs}. En fait, le taux d'erreur est de moins de 25\%
-à la fin du premier \textit{epoch}, puis stagne autour de 17-18\% après environ 5
+à la fin du premier \textit{epoch}, puis stagne autour de 17-18\% après environ cinq
 \textit{epochs}.
 
 
