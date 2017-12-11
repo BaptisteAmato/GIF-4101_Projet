@@ -58,15 +58,13 @@ def save_train_label_images(number_of_images=10, binary_masks=True):
         np.save(get_folder_images_saving_train_y(binary_masks) + "/" + str(i), label)
 
 
-def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, max_ones_ratio=0.8, lim_min=0.1, lim_max=0.9):
+def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, max_ones_ratio=0.8):
     """
     Saves the images after data augmentation, in an .hdf5 file
     :param nb_images:
     :param binary_masks:
     :param min_ones_ratio: ratio of "1" in the entire matrix. Helps not saving empty matrices if binary_masks=False
     :param max_ones_ratio:
-    :param lim_min:
-    :param lim_max:
     :return: X_train, X_test, y_train, y_test
     """
     print("AUGMENTING THE DATA")
