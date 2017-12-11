@@ -64,7 +64,9 @@ def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, max_ones_ratio=0.8
     :param nb_images:
     :param binary_masks:
     :param min_ones_ratio: ratio of "1" in the entire matrix. Helps not saving empty matrices if binary_masks=False
+    :param max_ones_ratio:
     :param lim_min:
+    :param lim_max:
     :return: X_train, X_test, y_train, y_test
     """
     print("AUGMENTING THE DATA")
@@ -85,9 +87,13 @@ def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, max_ones_ratio=0.8
             # matrices before taking the flips.
             crop_x_j = crops_x[j]
             crop_y_j = crops_y[j]
-            if np.sum(crop_x_j < lim_min) > min_ones and np.sum(crop_y_j[:, :, 0] < lim_min) > min_ones and \
-                            np.sum(crop_y_j[:, :, 1] > lim_min) > min_ones and np.sum(crop_x_j > lim_max) < max_ones and \
-                            np.sum(crop_y_j[:, :, 0] > lim_max) < max_ones and np.sum(crop_y_j[:, :, 1] > lim_max) < max_ones:
+            positive_axon = np.where(crop_y_j[:, :, 0] > 0)
+            actin_minus_axon = crop_x_j.copy()
+            actin_minus_axon[positive_axon] = 0
+            positive_dendrite = np.where(crop_y_j[:, :, 1] > 0)
+            actin_minus_dendrite = crop_x_j.copy()
+            actin_minus_dendrite[positive_dendrite] = 0
+            if np.sum(actin_minus_axon > 0) > min_ones and np.sum(actin_minus_dendrite > 0) > min_ones:
                 flips_x, flips_y = get_flips_images(crops_x[j], crops_y[j])
                 for k in range(0, 4):
                     train_set_x_orig.append(flips_x[k])
