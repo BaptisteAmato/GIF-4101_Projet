@@ -58,18 +58,17 @@ def save_train_label_images(number_of_images=10, binary_masks=True):
         np.save(get_folder_images_saving_train_y(binary_masks) + "/" + str(i), label)
 
 
-def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, max_ones_ratio=0.8):
+def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, lim=0.1):
     """
     Saves the images after data augmentation, in an .hdf5 file
     :param nb_images:
     :param binary_masks:
     :param min_ones_ratio: ratio of "1" in the entire matrix. Helps not saving empty matrices if binary_masks=False
-    :param max_ones_ratio: ratio of "1" in the entire matrix. Helps not saving too full matrices if binary_masks=False.
+    :param lim:
     :return: X_train, X_test, y_train, y_test
     """
     print("AUGMENTING THE DATA")
     min_ones = crop_size * min_ones_ratio
-    max_ones = crop_size * max_ones_ratio
     train_set_x_orig = []
     train_set_y_axon_orig = []
     train_set_y_dendrite_orig = []
@@ -83,11 +82,12 @@ def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, max_ones_ratio=0.8
         for j in range(0, length):
             # We do not want to keep too many black crops, so we make sure there is some data in both train and label
             # matrices before taking the flips.
-            if np.sum(crops_x[j]) > min_ones and np.sum(crops_y[j, :, :, 0]) > min_ones and np.sum(
-                    crops_y[j, :, :, 1]) > min_ones and np.sum(crops_x[j]) < max_ones and np.sum(
-                    crops_y[j, :, :, 0]) < max_ones and np.sum(crops_y[j, :, :, 1]) < max_ones:
+            crop_x_j = crops_x[j]
+            crop_y_j = crops_y[j]
+            if np.sum(crop_x_j < lim) > min_ones and np.sum(crop_y_j[:, :, 0] < lim) > min_ones and np.sum(
+                            crop_y_j[:, :, 1] < lim) > min_ones:
                 flips_x, flips_y = get_flips_images(crops_x[j], crops_y[j])
-                for k in range(0, 3):
+                for k in range(0, 4):
                     train_set_x_orig.append(flips_x[k])
                     train_set_y_axon_orig.append(flips_y[k, :, :, 0])
                     train_set_y_dendrite_orig.append(flips_y[k, :, :, 1])
@@ -114,10 +114,10 @@ def load_dataset(nb_examples, binary_masks, channel, train_test_splitting=True, 
     """
     Returns the train and test datasets
     :param nb_examples:
-    :param train_test_split:
-    :param train_ratio:
-    :param channel:
     :param binary_masks:
+    :param channel:
+    :param train_test_splitting:
+    :param train_ratio:
     :return: X_train, X_test, y_train, y_test
     """
     with h5py.File(get_dataset_h5py_path(binary_masks), 'r') as f:

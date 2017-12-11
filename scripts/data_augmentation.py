@@ -51,15 +51,17 @@ def get_all_crops(train, label):
 
 def get_flips_images(train, label):
     """
-    Returns the images after three mirror operations
+    Returns the images after three mirror operations + the original image.
     """
-    flips_train = np.zeros((3, train.shape[0], train.shape[1], train.shape[2]))
-    flips_train[0] = np.flip(train, axis=1)
-    flips_train[1] = np.flip(train, axis=0)
-    flips_train[2] = np.flip(flips_train[0], axis=1)
-    flips_label = np.zeros((3, label.shape[0], label.shape[1], label.shape[2]))
-    flips_label[0] = np.flip(label, axis=1)
-    flips_label[1] = np.flip(label, axis=0)
-    flips_label[2] = np.flip(flips_label[0], axis=1)
+    flips_train = np.zeros((4, train.shape[0], train.shape[1], train.shape[2]))
+    flips_train[0] = train
+    flips_train[1] = np.flip(train, axis=1)
+    flips_train[2] = np.flip(train, axis=0)
+    flips_train[3] = np.flip(flips_train[0], axis=1)
+    flips_label = np.zeros((4, label.shape[0], label.shape[1], label.shape[2]))
+    flips_label[0] = label
+    flips_label[1] = np.flip(label, axis=1)
+    flips_label[2] = np.flip(label, axis=0)
+    flips_label[3] = np.flip(flips_label[0], axis=1)
 
     return flips_train, flips_label
