@@ -58,17 +58,18 @@ def save_train_label_images(number_of_images=10, binary_masks=True):
         np.save(get_folder_images_saving_train_y(binary_masks) + "/" + str(i), label)
 
 
-def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, lim=0.1):
+def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, max_ones_ratio=0.8, lim_min=0.1, lim_max=0.9):
     """
     Saves the images after data augmentation, in an .hdf5 file
     :param nb_images:
     :param binary_masks:
     :param min_ones_ratio: ratio of "1" in the entire matrix. Helps not saving empty matrices if binary_masks=False
-    :param lim:
+    :param lim_min:
     :return: X_train, X_test, y_train, y_test
     """
     print("AUGMENTING THE DATA")
-    min_ones = crop_size * min_ones_ratio
+    min_ones = crop_size * crop_size * min_ones_ratio
+    max_ones = crop_size * crop_size * max_ones_ratio
     train_set_x_orig = []
     train_set_y_axon_orig = []
     train_set_y_dendrite_orig = []
@@ -84,8 +85,9 @@ def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, lim=0.1):
             # matrices before taking the flips.
             crop_x_j = crops_x[j]
             crop_y_j = crops_y[j]
-            if np.sum(crop_x_j < lim) > min_ones and np.sum(crop_y_j[:, :, 0] < lim) > min_ones and np.sum(
-                            crop_y_j[:, :, 1] < lim) > min_ones:
+            if np.sum(crop_x_j < lim_min) > min_ones and np.sum(crop_y_j[:, :, 0] < lim_min) > min_ones and \
+                            np.sum(crop_y_j[:, :, 1] > lim_min) > min_ones and np.sum(crop_x_j > lim_max) < max_ones and \
+                            np.sum(crop_y_j[:, :, 0] > lim_max) < max_ones and np.sum(crop_y_j[:, :, 1] > lim_max) < max_ones:
                 flips_x, flips_y = get_flips_images(crops_x[j], crops_y[j])
                 for k in range(0, 4):
                     train_set_x_orig.append(flips_x[k])
