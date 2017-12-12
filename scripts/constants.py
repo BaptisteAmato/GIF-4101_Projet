@@ -66,11 +66,11 @@ def get_model_evaluation_path(model_name):
     return folder_models + "/" + model_name + ".txt"
 
 
-def get_dataset_h5py_path(binary_masks):
+def get_dataset_h5py_path(binary_masks, channel):
     if binary_masks:
-        path = main_folder_path + "/dataset_binary.hdf5"
+        path = main_folder_path + "/dataset_binary_" + channel + ".hdf5"
     else:
-        path = main_folder_path + "/dataset_non_binary.hdf5"
+        path = main_folder_path + "/dataset_non_binary_" + channel + ".hdf5"
 
     return path
 

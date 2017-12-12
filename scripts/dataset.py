@@ -58,22 +58,25 @@ def save_train_label_images(number_of_images=10, binary_masks=True):
         np.save(get_folder_images_saving_train_y(binary_masks) + "/" + str(i), label)
 
 
-def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, max_ones_ratio=0.8):
+def save_dataset(nb_images, binary_masks, channel, min_ones_ratio=0.2):
     """
     Saves the images after data augmentation, in an .hdf5 file
     :param nb_images:
     :param binary_masks:
     :param min_ones_ratio: ratio of "1" in the entire matrix. Helps not saving empty matrices if binary_masks=False
-    :param max_ones_ratio:
     :return: X_train, X_test, y_train, y_test
     """
+    if channel == 'axons':
+        index_y = 0
+    elif channel == 'dendrites':
+        index_y = 1
+    else:
+        raise ValueError('channel attribute must either be "axons" or "dendrites"')
+
     print("AUGMENTING THE DATA")
     min_ones = crop_size * crop_size * min_ones_ratio
-    max_ones = crop_size * crop_size * max_ones_ratio
-    train_set_x_axon_orig = []
-    train_set_y_axon_orig = []
-    train_set_x_dendrite_orig = []
-    train_set_y_dendrite_orig = []
+    train_set_x_orig = []
+    train_set_y_orig = []
     for i in range(0, nb_images):
         if i % 10 == 0:
             print(i)
@@ -85,48 +88,29 @@ def save_dataset(nb_images, binary_masks, min_ones_ratio=0.2, max_ones_ratio=0.8
             # The discriminant crops will be the ones where there is some difference between the actin and the
             # axons/dendrites. Only these ones will be flipped.
             crop_x_j = crops_x[j]
-            crop_y_j = crops_y[j]
+            crop_y_j = np.expand_dims(crops_y[j][:, :, index_y], 3)
 
-            positive_axon = np.where(crop_y_j[:, :, 0] > 0)
-            actin_minus_axon = crop_x_j.copy()
-            actin_minus_axon[positive_axon] = 0
-            if np.sum(actin_minus_axon > 0) > min_ones:
-                flips_x, flips_y = get_flips_images(crops_x[j], crops_y[j])
+            positive_channel = np.where(crop_y_j > 0)
+            actin_minus_channel = crop_x_j.copy()
+            actin_minus_channel[positive_channel] = 0
+            if np.sum(actin_minus_channel > 0) > min_ones:
+                flips_x, flips_y = get_flips_images(crop_x_j, crop_y_j)
                 for k in range(0, 4):
-                    train_set_x_axon_orig.append(flips_x[k])
-                    train_set_y_axon_orig.append(flips_y[k, :, :, 0])
+                    train_set_x_orig.append(flips_x[k])
+                    train_set_y_orig.append(flips_y[k])
             else:
-                train_set_x_axon_orig.append(crops_x[j])
-                train_set_y_axon_orig.append(crops_y[j, :, :, 0])
-
-            positive_dendrite = np.where(crop_y_j[:, :, 1] > 0)
-            actin_minus_dendrite = crop_x_j.copy()
-            actin_minus_dendrite[positive_dendrite] = 0
-            if np.sum(actin_minus_dendrite > 0) > min_ones:
-                flips_x, flips_y = get_flips_images(crops_x[j], crops_y[j])
-                for k in range(0, 4):
-                    train_set_x_dendrite_orig.append(flips_x[k])
-                    train_set_y_dendrite_orig.append(flips_y[k, :, :, 1])
-            else:
-                train_set_x_dendrite_orig.append(crops_x[j])
-                train_set_y_dendrite_orig.append(crops_y[j, :, :, 1])
+                train_set_x_orig.append(crop_x_j)
+                train_set_y_orig.append(crop_y_j)
 
     # Save the created data sets to an hdf5 file.
     print("SAVING THE HDF5 FILE")
-    with h5py.File(get_dataset_h5py_path(binary_masks), 'w') as f:
-        length_axons = len(train_set_x_axon_orig)
-        print("Length axons: " + str(length_axons))
-        dataset = f.create_dataset("X_axon", (length_axons, crop_size, crop_size, 1))
-        dataset[...] = np.array(train_set_x_axon_orig)
-        dataset = f.create_dataset("y_axon", (length_axons, crop_size, crop_size, 1))
-        dataset[...] = np.expand_dims(np.array(train_set_y_axon_orig), axis=3)
-
-        length_dendrites = len(train_set_x_dendrite_orig)
-        print("Length dendrites: " + str(length_dendrites))
-        dataset = f.create_dataset("X_dendrite", (length_dendrites, crop_size, crop_size, 1))
-        dataset[...] = np.array(train_set_x_dendrite_orig)
-        dataset = f.create_dataset("y_dendrite", (length_dendrites, crop_size, crop_size, 1))
-        dataset[...] = np.expand_dims(np.array(train_set_y_dendrite_orig), axis=3)
+    with h5py.File(get_dataset_h5py_path(binary_masks, channel), 'w') as f:
+        length = len(train_set_x_orig)
+        print("Length: " + str(length))
+        dataset = f.create_dataset("X", (length, crop_size, crop_size, 1))
+        dataset[...] = np.array(train_set_x_orig)
+        dataset = f.create_dataset("y", (length, crop_size, crop_size, 1))
+        dataset[...] = np.array(train_set_y_orig)
     print("DONE")
 
 
@@ -140,15 +124,9 @@ def load_dataset(nb_examples, binary_masks, channel, train_test_splitting=True, 
     :param train_ratio:
     :return: X_train, X_test, y_train, y_test
     """
-    with h5py.File(get_dataset_h5py_path(binary_masks), 'r') as f:
-        if channel == 'axons':
-            X = f['X_axon'].value
-            y = f['y_axon'].value
-        elif channel == 'dendrites':
-            X = f['X_dendrite'].value
-            y = f['y_dendrite'].value
-        else:
-            raise ValueError('channel attribute must either be "axons" or "dendrites"')
+    with h5py.File(get_dataset_h5py_path(binary_masks, channel), 'r') as f:
+        X = f['X'].value
+        y = f['y'].value
         if train_test_splitting:
             if nb_examples is None:
                 return train_test_split(X, y, train_size=train_ratio)
