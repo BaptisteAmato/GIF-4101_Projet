@@ -75,6 +75,27 @@ def get_dataset_h5py_path(binary_masks, channel):
     return path
 
 
+def get_test_data_folder_after_training(model_name, channel, binary_masks):
+    if binary_masks:
+        subfolder = 'binary'
+    else:
+        subfolder = 'non_binary'
+
+    # Create folders if not exist.
+    if not os.path.exists(folder_models_weights):
+        os.makedirs(folder_models_weights)
+    if not os.path.exists(folder_models_weights + '/' + channel):
+        os.makedirs(folder_models_weights + '/' + channel)
+    if not os.path.exists(folder_models_weights + '/' + channel + '/' + subfolder):
+        os.makedirs(folder_models_weights + '/' + channel + '/' + subfolder)
+
+    path = folder_models_weights + '/' + channel + '/' + subfolder + "/" + model_name
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    return path
+
+
 original_data = main_folder_path + '/original_data'
 folder_models = main_folder_path + '/models'
 folder_models_weights = main_folder_path + '/models_weights'

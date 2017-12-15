@@ -3,6 +3,7 @@ from tensorflow.python.framework.errors_impl import ResourceExhaustedError
 
 from dataset import *
 from image_processing import *
+from constants import *
 
 
 def _predict(my_model, crops_x, batch_size):
@@ -116,6 +117,11 @@ def train_model(model_name="model_yang", nb_examples=2, epochs=1, batch_size=2, 
     print("Y_train shape: " + str(y_train.shape))
     print("X_test shape: " + str(X_test.shape))
     print("Y_test shape: " + str(y_test.shape))
+
+    # Save the test data.
+    path_test_data = get_test_data_folder_after_training(model_name, channel, binary_masks)
+    np.save(path_test_data + "/x", X_test)
+    np.save(path_test_data + "/y", y_test)
 
     # Get the right model.
     model_module = __import__("models")
