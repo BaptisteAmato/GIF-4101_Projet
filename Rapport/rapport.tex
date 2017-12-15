@@ -98,7 +98,7 @@
 % DOCUMENT INFO SECTION
 %-------------------------------------------------------------------------------
 \title{Apprentissage et reconnaissance - GIF-4101/GIF-7005 - Projet}
-\author{Baptiste AMATO, Alexandre CHAVENON \& Arnoud VANHUELE}
+\author{Baptiste AMATO, Arnoud VANHUELE \& Alexandre CHAVENON}
 \date\today
 
 \begin{document}
@@ -135,8 +135,8 @@
   \begin{flushleft} \large
    \emph{Auteurs :}\\
    Baptiste \textsc{Amato} \\
-   Alexandre \textsc{Chavenon} \\
    Arnoud \textsc{Vanhuele} \\
+   Alexandre \textsc{Chavenon} \\
   \end{flushleft}
  \end{minipage}
 
@@ -159,8 +159,8 @@ Le jeu de données initial comprend 1024 images au format \textit{.tiff}, ayant
 chacune trois canaux : un pour l'actine (la protéine d'intérêt), un pour les axones,
 et un pour les dendrites. \\
 Ce jeu de données étant relativement petit pour un apprentissage par réseau neuronal,
-nous allons utiliser des méthodes d'augmentation comme les symétries, rotations, ou
-encore découpes de sous-parties des images.
+nous allons utiliser des méthodes d'augmentation comme des symétries et des découpes
+de sous-parties des images.
 
 \section{Etat de l'art}
 
@@ -171,7 +171,7 @@ par exemple pour la détection de visage, de personnes ou de voitures ; on cherc
 alors à détecter le contour des objets. Un article de recherche assez récent a
 démontré une capacité de détection de contour impressionnante : \textit{Object Contour
  Detection with a Fully Convolutional Encoder-Decoder Network}, par \textbf{Yang
- \textit{et al.}}. Nous pensons donc nous orienter vers un réseau de neurones profond
+ \textit{et al.}}. Nous nous sommes donc orientés vers un réseau de neurones profond
 avec une architecture \textit{Encoder-Decoder} ; cette architecture est aussi
 utilisée dans les traductions de textes (séquences en entrée et sortie). Des résultats
 probants concernant de la segmentation d'images sont présentés dans l'article
@@ -180,15 +180,7 @@ probants concernant de la segmentation d'images sont présentés dans l'article
 architecture similaire (\textit{Encoder-Decoder}). \\
 Les principes de segmentation d'image sont clairement expliqués dans l'article
 \textbf{Fully Convolutional Networks for Semantic Segmentation}, par \textbf{Shelhamer
- \textit{et al.}}. \\
-Concernant l’augmentation de notre jeu de données, nous aurons une approche
-classique par traitement d’image traditionnel et dans un second temps, nous
-explorerons la possibilité d'utiliser un "Generative Adversarial Network" pour l’augmentation
-des données, tel qu'il est montré dans l'article\textit{Biomedical Data Augmentation Using
-Generative Adversarial Neural Networks. Artificial Neural Networks and Machine
-Learning} par \textbf{Calimeri, F.
  \textit{et al.}}.
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Pré-traitements}
@@ -253,23 +245,23 @@ le réseau n'avait aucun moyen de savoir quel canal devait être corrigé. \\
 Nous nous sommes demandés s'il était nécessaire de conserver des valeurs décimales
 pour les axones en dendrites, ou bien ne garder que des valeurs binaires comme le
 font les autres problèmes de segmentation d'image. Nous avons donc créé deux jeux
-de données, l'un binaire, l'autre non, afin de comparer les performances.
+de données, l'un binaire, l'autre non, afin de comparer les performances. Il semble
+finalement qu'il est préférable de garder des valeurs décimales.
 
 \section{Prédiction d'une nouvelle image}
 
 Là encore, il est nécessaire de procéder par \textit{crops} pour traiter une nouvelle
 image. Ainsi, chaque \textit{crop} sera associé à une image de prédiction
 et l'image résultante sera reconstituée à partir de ces \textit{crops}. Le réseau
-de neurones n'a donc affaires qu'à des images de taille 224x2242z.
+de neurones n'a donc affaires qu'à des images de taille 224x224x1.
 
 \subsection{Augmentation des données}
 
 Nous avons, pour chaque \textit{crop}, ajouté des \textit{flips} (opérations "miroir")
 permettant d'avoir quatre nouvelles données en sortie (l'originale, la symmétrie horizontale,
 verticale et l'enchaînement des deux). Ces opérations ne sont effectuées que lorsque
-l'image contient de l'information intéressante, c'est-à-dire si elle n'est pas trop
-noire ni trop colorée (en effet, dans ces cas, les opérations de symétrie n'auraient
-que peu d'intérêt).
+le crop est assez "discriminant", c'est-à-dire si la différence entre l'actine
+et le masque d'axone ou de dendrite est assez importante.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -285,8 +277,8 @@ qui en \textit{Keras} se font grâce à l'opération \textit{UpSampling} suivie 
 grâce à l'ajout de \textit{padding}). \\
 L'optimisation est faite avec la méthode \textbf{Adam} utilisant les avantages des
 algorithmes \textbf{AdaGrad} et \textbf{RMSProp}  ; celle-ci a fait ses preuves
-dans le monde du Deep Learning. \\ \\
-+ TODO: loss function
+dans le monde du Deep Learning. Nous utilisons la fonction de perte \textbf{mean
+squared error}. \\ \\
 
 \chapter{Tests}
 
@@ -309,7 +301,6 @@ modèle en question : l'un conserve la structure du modèle en \textit{.json} et
 l'autre sauvegarde les poids appris en \textit{.hdf5}. On peut ainsi "re-créer"
 en local le modèle déjà appris et voir ce qu'il donne sur différentes images.
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Résultats}
 
@@ -321,105 +312,9 @@ pourquoi nous appliquons un masque sur les prédictions afin de n'avoir que du
 contenu pouvant être superposé à l'actine d'origine (en effet, dans la plupart
 des prédictions, le fond est légèrement coloré, mais cela nous importe peu).
 
-\section{Premiers résultats}
+\section{Exemples de prédictions}
 
-Nos premiers résultats ont montré que notre réseau avait du mal à distinguer
-les axones et dendrites de l'actine. En effet, on voit ci-dessous que les deux labels
-retracent en grande partie l'image de l'actine, bien que les dendrites soient assez
-bien détourées. Afin de supprimer les faibles intensités, correspondant aux valeurs
-"peu sûres", nous appliquons un \textit{threshold} en post-traitement.
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.5]{"truth"}
-\caption{Images originales, avec l'image fusionnée, les axones et les dendrites}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.5]{"result"}
-\caption{Images prédites, avec l'image fusionnée, les axones et les dendrites}
-\end{figure}
-
-Les résultats ci-dessus ont été obtenus avec le modèle issu de l'article de
-\textit{Yang et al.}, entraînés sur 500 images d'origine. On obtient une erreur
-très élevée d'environ 45\%. \\ \\
-En modifiant la fonction de perte, on obtient de meilleurs résultats, jusqu'à
-sur-apprendre :
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.5]{"result_overfit_truth"}
-\caption{Vérité : actine et axones}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.8]{"result_overfit"}
-\caption{Prédiction sur les axones}
-\end{figure}
-
-\section{Cas bien prédits}
-
-Nous avons beaucoup plus de mal à ne pas sur-apprendre les axones, étant donné
-que le masque de ceux-ci est souvent très proche de l'actine. On obtient de bons
-résultats avec les dendrites, comme suit :
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.5]{"good_result_truth"}
-\caption{Vérité : actine et dendrites}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.8]{"good_result"}
-\caption{Prédiction sur les dendrites}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.5]{"2_truth"}
-\caption{Vérité : actine et dendrites}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.8]{"2_result"}
-\caption{Prédiction sur les dendrites}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.5]{"91_truth"}
-\caption{Vérité : actine et dendrites}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.8]{"91_result"}
-\caption{Prédiction sur les dendrites}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.5]{"397_truth"}
-\caption{Vérité : actine et dendrites}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.8]{"397_result"}
-\caption{Prédiction sur les dendrites}
-\end{figure}
-
-\section{Labels binaires ou non ? Séparation des labels ?}
-
-Il s'avère que les prédictions sont semblables, que nous gardions des intensités
-décimales entre 0 et 1 ou bien des valeurs binaires pour les masques des axones
-et des dendrites. \\
-En revanche, il est clair que le réseau donne de bien meilleurs résultats lorsque
-les axones et dendrites sont prédites séparément.
+% TODO: mettre ici des bons exemples (montrer originales + predictions)
 
 \section{Temps d'entraînement}
 
@@ -433,30 +328,27 @@ seulement quelques \textit{epochs}. En fait, le taux d'erreur est de moins de 25
 \chapter{Analyse}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Contraintes}
-
-Les images fournies étaient en moyenne de haute résolution. Ainsi, les données
-avant augmentation pesaient déjà assez lourd, mais après augmentation nous
-avions un jeu de données d'environ 55 gigas. De plus, nous devions utiliser un
-ordinateur à distance afin d'avoir un GPU puissant, ce qui rendait les transferts
-de données compliqués (sans parler du fait que l'espace mémoire de l'ordinateur
-à distance était en grande partie utilisé). Cela a donc grandement ralenti le
-processus, étant donné que la sauvegarde du jeu de données entier après augmentation
-prenait un jour entier. Nous n'avons donc pas pu tester différentes augmentations
-sur l'ensemble des images d'origine, bien que nous pensons qu'il s'agit du principal
-point à traiter pour résoudre nos problèmes de sur-apprentissage. \\
-L'entraînement était aussi particulièrement long ; nous disposions de plus de
-110 000 matrices à traiter (après augmentation). Un entraînement sur 70\% des
-données (en enlevant une partie pour les tests), pendant 30 epochs prenait une
-dizaine d'heures.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Pistes d'amélioration}
+
+% TODO: dire qu'on n'a pas eu le temps de tester d'autres genres de data augmentation,
+% ni beaucoup de modeles à cause du temps d'entrainement long
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Protocole d'utilisation}
 
-TODO: save train / label + save dataset + train + test
+La première chose à faire est de créer un fichier \textbf{config.py} et de spécifier
+le chemin d'accès vers les images d'origine dans la variable \textit{main\_folder\_path}.
+Les images doivent être placées dans un dossier appelé \textit{original\_data} (que
+l'on peut modifier dans le fichier \textbf{constants.py}). Il faut ensuite générer
+le jeu de données traitées, à l'aide de la fonction \textit{save\_train\_label\_images(number\_of\_images0)}
+du fichier \textbf{dataset.py}. Si l'on veut ré-entraîner le modèle, il faut aussi
+générer le jeu de données d'entraînement (après augmentation des données), avec
+ \textit{save\_dataset(nb\_images, channel)} du même fichier ( \textit{channel} prend l'une
+ des valeurs "axons" ou "dendrites"). Un exemple d'entraînement est donné dans le fichier
+ \textbf{multi\_testing.py} ; le modèle doit être défini dans le fichier \textbf{models.py}.
+ Afin d'afficher une image provenant du jeu de données traitées, il suffit d'appeler
+ la fonction \textit{get\_images\_from\_train\_label(X[i], y[i], channel)}, où \textit{X}
+ et \textit{y} représentent les jeu de données traitées.
 
 
 

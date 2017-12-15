@@ -26,3 +26,5 @@ def run_multi_tests(models_to_test):
 #         'train_test_splitting': True
 #     }
 # ]
+# 
+# run_multi_tests(models_to_test)
