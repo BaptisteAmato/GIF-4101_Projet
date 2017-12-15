@@ -16,16 +16,15 @@ def get_files_path_generator():
                 yield os.path.join(subdir, file)
 
 
-def get_train_label_images(tif_image, binary_masks):
+def get_train_label_images(tif_image):
     """
     Process the original image to be then saved as .npy file
     :param tif_image:
-    :param binary_masks:
     :return:
     """
     actin_original, axon_original, dendrite_original = split_tif_image(tif_image)
     _, actin, axon, dendrite = get_colored_images(actin_original, axon_original, dendrite_original)
-    actin, axon, dendrite = get_contour_map(actin, axon, dendrite, binary_masks)
+    actin, axon, dendrite = get_contour_map(actin, axon, dendrite)
     train = np.expand_dims(actin, axis=2)
     test = np.zeros((train.shape[0], train.shape[1], 2))
     test[:, :, 0] = axon
@@ -33,37 +32,35 @@ def get_train_label_images(tif_image, binary_masks):
     return train, test
 
 
-def save_train_label_images(number_of_images=10, binary_masks=True):
+def save_train_label_images(number_of_images=10):
     """
     Saves the images after processing, as .npy files
     :param number_of_images:
-    :param binary_masks:
     :return:
     """
     # Create folders if not exist.
-    if not os.path.exists(get_folder_images_saving(binary_masks)):
-        os.makedirs(get_folder_images_saving(binary_masks))
-    if not os.path.exists(get_folder_images_saving_train_x(binary_masks)):
-        os.makedirs(get_folder_images_saving_train_x(binary_masks))
-    if not os.path.exists(get_folder_images_saving_train_y(binary_masks)):
-        os.makedirs(get_folder_images_saving_train_y(binary_masks))
+    if not os.path.exists(get_folder_images_saving()):
+        os.makedirs(get_folder_images_saving())
+    if not os.path.exists(get_folder_images_saving_train_x()):
+        os.makedirs(get_folder_images_saving_train_x())
+    if not os.path.exists(get_folder_images_saving_train_y()):
+        os.makedirs(get_folder_images_saving_train_y())
 
     generator = get_files_path_generator()
     for i in range(0, number_of_images):
         print(i)
         file_path = next(generator)
         tif_image = tifffile.imread(file_path)
-        train, label = get_train_label_images(tif_image, binary_masks)
-        np.save(get_folder_images_saving_train_x(binary_masks) + "/" + str(i), train)
-        np.save(get_folder_images_saving_train_y(binary_masks) + "/" + str(i), label)
+        train, label = get_train_label_images(tif_image)
+        np.save(get_folder_images_saving_train_x() + "/" + str(i), train)
+        np.save(get_folder_images_saving_train_y() + "/" + str(i), label)
 
 
-def save_dataset(nb_images, binary_masks, channel, min_ones_ratio=0.2):
+def save_dataset(nb_images, channel, min_ones_ratio=0.2):
     """
     Saves the images after data augmentation, in an .hdf5 file
     :param nb_images:
-    :param binary_masks:
-    :param min_ones_ratio: ratio of "1" in the entire matrix. Helps not saving empty matrices if binary_masks=False
+    :param min_ones_ratio: ratio of non-zero values in the entire matrix.
     :return: X_train, X_test, y_train, y_test
     """
     if channel == 'axons':
@@ -80,8 +77,8 @@ def save_dataset(nb_images, binary_masks, channel, min_ones_ratio=0.2):
     for i in range(0, nb_images):
         if i % 10 == 0:
             print(i)
-        x = np.load(get_folder_images_saving_train_x(binary_masks) + "/" + str(i) + ".npy")
-        y = np.load(get_folder_images_saving_train_y(binary_masks) + "/" + str(i) + ".npy")
+        x = np.load(get_folder_images_saving_train_x() + "/" + str(i) + ".npy")
+        y = np.load(get_folder_images_saving_train_y() + "/" + str(i) + ".npy")
         crops_x, crops_y = get_all_crops(x, y)
         length = crops_x.shape[0]
         for j in range(0, length):
@@ -104,7 +101,7 @@ def save_dataset(nb_images, binary_masks, channel, min_ones_ratio=0.2):
 
     # Save the created data sets to an hdf5 file.
     print("SAVING THE HDF5 FILE")
-    with h5py.File(get_dataset_h5py_path(binary_masks, channel), 'w') as f:
+    with h5py.File(get_dataset_h5py_path(channel), 'w') as f:
         length = len(train_set_x_orig)
         print("Length: " + str(length))
         dataset = f.create_dataset("X", (length, crop_size, crop_size, 1))
@@ -114,17 +111,16 @@ def save_dataset(nb_images, binary_masks, channel, min_ones_ratio=0.2):
     print("DONE")
 
 
-def load_dataset(nb_examples, binary_masks, channel, train_test_splitting=True, train_ratio=0.7):
+def load_dataset(nb_examples, channel, train_test_splitting=True, train_ratio=0.7):
     """
     Returns the train and test datasets
     :param nb_examples:
-    :param binary_masks:
     :param channel:
     :param train_test_splitting:
     :param train_ratio:
     :return: X_train, X_test, y_train, y_test
     """
-    with h5py.File(get_dataset_h5py_path(binary_masks, channel), 'r') as f:
+    with h5py.File(get_dataset_h5py_path(channel), 'r') as f:
         X = f['X'].value
         y = f['y'].value
         if train_test_splitting:

@@ -87,4 +87,3 @@ def print_smallest_image_dimension():
     print(min_cols)
     print(min_cols_img)
 
-print_smallest_image_dimension()

@@ -18,7 +18,7 @@ def _predict(my_model, crops_x, batch_size):
     return _predict(my_model, crops_x, batch_size)
 
 
-def test_image(index, model_name, channel, binary_masks, thresh_results=False, threshold=0.1, batch_size=32, apply_actin_mask=True):
+def test_image(index, model_name, channel, thresh_results=False, threshold=0.1, batch_size=32, apply_actin_mask=True):
     """
     Compute prediction of an actin image
     :param index:
@@ -26,12 +26,11 @@ def test_image(index, model_name, channel, binary_masks, thresh_results=False, t
     :param thresh_results:
     :param threshold:
     :param batch_size:
-    :param binary_masks:
     :return:
     """
     print("########## LOADING THE IMAGE ##############")
-    x = np.load(get_folder_images_saving_train_x(binary_masks) + "/" + str(index) + ".npy")
-    y = np.load(get_folder_images_saving_train_y(binary_masks) + "/" + str(index) + ".npy")
+    x = np.load(get_folder_images_saving_train_x() + "/" + str(index) + ".npy")
+    y = np.load(get_folder_images_saving_train_y() + "/" + str(index) + ".npy")
     rows = x.shape[0]
     cols = x.shape[1]
     print(rows)
@@ -39,7 +38,7 @@ def test_image(index, model_name, channel, binary_masks, thresh_results=False, t
     print("########## CROPPING THE IMAGE ##############")
     crops_x, _ = get_all_crops(x, None)
     print(crops_x.shape)
-    my_model = load_model(model_name, channel, binary_masks)
+    my_model = load_model(model_name, channel)
     print("########## PREDICTING THE CROPS ##############")
     predicted_crops = _predict(my_model, crops_x, batch_size)
     print("########## RECONSTITUTING THE IMAGE ##############")
@@ -103,11 +102,11 @@ def _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size,
     return _fit_model(my_model, X_train, y_train, validation_split, epochs, batch_size, callbacks)
 
 
-def train_model(model_name="model_yang", nb_examples=2, epochs=1, batch_size=2, validation_split=0.3,
-                use_saved_weights=False, evaluate=True, show_example=False, channel='axons', binary_masks=True, train_test_splitting=True):
+def train_model(model_name, nb_examples=2, epochs=1, batch_size=2, validation_split=0.3,
+                use_saved_weights=False, evaluate=True, show_example=False, channel='axons', train_test_splitting=True):
     # Load dataset.
     print("######## LOADING THE MODEL ###########")
-    X_train, X_test, y_train, y_test = load_dataset(nb_examples, binary_masks, channel, train_test_splitting=train_test_splitting)
+    X_train, X_test, y_train, y_test = load_dataset(nb_examples, channel, train_test_splitting=train_test_splitting)
 
     nb_train_examples = X_train.shape[0]
     nb_test_examples = X_test.shape[0]
@@ -119,7 +118,7 @@ def train_model(model_name="model_yang", nb_examples=2, epochs=1, batch_size=2, 
     print("Y_test shape: " + str(y_test.shape))
 
     # Save the test data.
-    path_test_data = get_test_data_folder_after_training(model_name, channel, binary_masks)
+    path_test_data = get_test_data_folder_after_training(model_name, channel)
     np.save(path_test_data + "/x", X_test)
     np.save(path_test_data + "/y", y_test)
 
@@ -130,14 +129,10 @@ def train_model(model_name="model_yang", nb_examples=2, epochs=1, batch_size=2, 
     my_model = get_model(X_train.shape[1:])
     # my_model = get_model((crop_size, crop_size, 1))
     if use_saved_weights:
-        my_model.load_weights(get_model_weights_path(model_name, channel, binary_masks))
+        my_model.load_weights(get_model_weights_path(model_name, channel))
 
-    if binary_masks:
-        loss = 'binary_crossentropy'
-        metrics = ['binary_accuracy']
-    else:
-        loss = 'mean_squared_error'
-        metrics = ['mse']
+    loss = 'mean_squared_error'
+    metrics = ['mse']
     my_model.compile(optimizer="adam", loss=loss, metrics=metrics)
 
     # Save the model to json.
@@ -146,7 +141,7 @@ def train_model(model_name="model_yang", nb_examples=2, epochs=1, batch_size=2, 
         json_file.write(model_json)
 
     # Best weights are saved if validation_loss decreases.
-    checkpointer = ModelCheckpoint(filepath=get_model_weights_path(model_name, channel, binary_masks), verbose=1, save_best_only=True)
+    checkpointer = ModelCheckpoint(filepath=get_model_weights_path(model_name, channel), verbose=1, save_best_only=True)
     # Write output to a file after each epoch.
     csv_logger = CSVLogger(main_folder_path + '/keras_log.csv', append=True, separator=';')
     # Early stopping when validation_loss does not decrease anymore.
@@ -158,7 +153,7 @@ def train_model(model_name="model_yang", nb_examples=2, epochs=1, batch_size=2, 
 
     # Load the best weights.
     print("######## LOADING THE BEST WEIGHTS ###########")
-    my_model.load_weights(get_model_weights_path(model_name, channel, binary_masks))
+    my_model.load_weights(get_model_weights_path(model_name, channel))
 
     if train_test_splitting and evaluate:
         # Evaluate the model.

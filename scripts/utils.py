@@ -40,12 +40,10 @@ def get_images_from_train_label(train, label, channel):
     return actin, axon_or_dendrite
 
 
-def load_model(model_name, channel, binary_masks):
+def load_model(model_name, channel):
     """
-
     :param model_name:
     :param channel:
-    :param binary:
     :return:
     """
     # Load the model.
@@ -54,7 +52,7 @@ def load_model(model_name, channel, binary_masks):
     with open(path) as f:
         my_model = model_from_json(f.read())
     # Load the weights.
-    path = get_model_weights_path(model_name, channel, binary_masks)
+    path = get_model_weights_path(model_name, channel)
     print("Loading " + path)
     my_model.load_weights(path)
     # Compile the model

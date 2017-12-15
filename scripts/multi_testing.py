@@ -9,7 +9,7 @@ def run_multi_tests(models_to_test):
         else:
             train_model(model['name'], nb_examples=model['nb_examples'], validation_split=model['validation_split'],
                         epochs=model['epochs'], batch_size=model["batch_size"], use_saved_weights=model["use_saved_weights"],
-                        channel=model['channel'], binary_masks=model['binary_masks'], train_test_splitting=model['train_test_splitting'])
+                        channel=model['channel'], train_test_splitting=model['train_test_splitting'])
 
 
 # Example:
@@ -22,9 +22,8 @@ def run_multi_tests(models_to_test):
 #         'batch_size': 64,
 #         'use_saved_weights': True,
 #         'channel': 'axons',
-#         'binary_masks': True,
 #         'train_test_splitting': True
 #     }
 # ]
-# 
+#
 # run_multi_tests(models_to_test)

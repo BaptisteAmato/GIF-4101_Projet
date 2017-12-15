@@ -3,51 +3,38 @@ import os
 from config import *
 
 
-def get_folder_images_saving(binary_masks=True):
+def get_folder_images_saving():
     """
     Returns the folder in which the processed images should be saved (as .npy)
-    :param binary_masks:
     :return:
     """
-    if binary_masks:
-        return main_folder_path + '/dataset_binary'
-    else:
-        return main_folder_path + '/dataset_non_binary'
+    return main_folder_path + '/dataset'
 
 
-def get_folder_images_saving_train_x(binary_masks=True):
+def get_folder_images_saving_train_x():
     """
     Returns the folder in which the processed axon images should be saved (as .npy)
-    :param binary_masks:
     :return:
     """
-    return get_folder_images_saving(binary_masks) + '/train_x'
+    return get_folder_images_saving() + '/train_x'
 
 
-def get_folder_images_saving_train_y(binary_masks=True):
+def get_folder_images_saving_train_y():
     """
     Returns the folder in which the processed actin and dendrites images should be saved (as .npy)
-    :param binary_masks:
     :return:
     """
-    return get_folder_images_saving(binary_masks) + '/train_y'
+    return get_folder_images_saving() + '/train_y'
 
 
-def get_model_weights_path(model_name, channel, binary_masks):
-    if binary_masks:
-        subfolder = 'binary'
-    else:
-        subfolder = 'non_binary'
-
+def get_model_weights_path(model_name, channel):
     # Create folders if not exist.
     if not os.path.exists(folder_models_weights):
         os.makedirs(folder_models_weights)
     if not os.path.exists(folder_models_weights + '/' + channel):
         os.makedirs(folder_models_weights + '/' + channel)
-    if not os.path.exists(folder_models_weights + '/' + channel + '/' + subfolder):
-        os.makedirs(folder_models_weights + '/' + channel + '/' + subfolder)
 
-    return folder_models_weights + '/' + channel + '/' + subfolder + "/" + model_name + model_weights_suffix
+    return folder_models_weights + '/' + channel + "/" + model_name + model_weights_suffix
 
 
 def get_model_path(model_name):
@@ -66,30 +53,18 @@ def get_model_evaluation_path(model_name):
     return folder_models + "/" + model_name + ".txt"
 
 
-def get_dataset_h5py_path(binary_masks, channel):
-    if binary_masks:
-        path = main_folder_path + "/dataset_binary_" + channel + ".hdf5"
-    else:
-        path = main_folder_path + "/dataset_non_binary_" + channel + ".hdf5"
-
-    return path
+def get_dataset_h5py_path(channel):
+    return main_folder_path + "/dataset_" + channel + ".hdf5"
 
 
-def get_test_data_folder_after_training(model_name, channel, binary_masks):
-    if binary_masks:
-        subfolder = 'binary'
-    else:
-        subfolder = 'non_binary'
-
+def get_test_data_folder_after_training(model_name, channel):
     # Create folders if not exist.
     if not os.path.exists(folder_models_weights):
         os.makedirs(folder_models_weights)
     if not os.path.exists(folder_models_weights + '/' + channel):
         os.makedirs(folder_models_weights + '/' + channel)
-    if not os.path.exists(folder_models_weights + '/' + channel + '/' + subfolder):
-        os.makedirs(folder_models_weights + '/' + channel + '/' + subfolder)
 
-    path = folder_models_weights + '/' + channel + '/' + subfolder + "/" + model_name
+    path = folder_models_weights + '/' + channel + "/" + model_name
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -101,6 +76,3 @@ folder_models = main_folder_path + '/models'
 folder_models_weights = main_folder_path + '/models_weights'
 model_weights_suffix = '_weights.hdf5'
 crop_size = 224
-
-# Image example: 2017-11-14 EXP211 Stim KN93/05_KCl_SMI31-STAR580_MAP2-STAR488_PhSTAR635_1.msr_STED640_Conf561_Conf488_merged.tif
-
