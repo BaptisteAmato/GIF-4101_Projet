@@ -299,7 +299,13 @@ lancer plusieurs tests sur l'ensemble des données. \\
 Chaque exécution de modèle génère deux fichiers, tous deux accompagnés du nom du
 modèle en question : l'un conserve la structure du modèle en \textit{.json} et
 l'autre sauvegarde les poids appris en \textit{.hdf5}. On peut ainsi "re-créer"
-en local le modèle déjà appris et voir ce qu'il donne sur différentes images.
+en local le modèle déjà appris et voir ce qu'il donne sur différentes images. \\
+Afin de tester l'efficacité du réseau, nous avons séparé le jeu de données en deux :
+une partie pour l'entraînement, et une partie pour les tests. Lors de l'apprentissage
+en tant que tel, 30\% des données d'entraînement sont utilisées pour la validation,
+avec un arrêt prématuré si deux itérations consécutives n'améliorent pas les
+performances sur le jeu de validation. Enfin, toutes les images de résultats
+présentées plus bas font partie du jeu de test.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Résultats}
