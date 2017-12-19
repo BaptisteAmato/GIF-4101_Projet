@@ -318,9 +318,24 @@ pourquoi nous appliquons un masque sur les prédictions afin de n'avoir que du
 contenu pouvant être superposé à l'actine d'origine (en effet, dans la plupart
 des prédictions, le fond est légèrement coloré, mais cela nous importe peu).
 
-\section{Exemples de prédictions}
+\section{Prédictions}
 
-% TODO: mettre ici des bons exemples (montrer originales + predictions)
+\subsection{Dendrites}
+
+Nous nous sommes principalement penchés sur la détection des dendrites, car les
+masques correspondants ne représentent généralement qu'une petite partie de l'actine.
+En annexe, des exemples de résultats.
+
+\subsection{Axones}
+
+Nous n'avons pas eu le temps de nous pencher de façon approfondie sur les axones ;
+ceux-ci, étant donnés les masques du jeu de données intiales, ont des prédictions qui
+ont tendance à être sur-apprises, donc sur une nouvelle données, le masque de l'axone
+ressemble beaucoup à l'image entière. Nous pensons qu'il est nécessaire d'effectuer
+un ajustement des paramètres particulier pour les axones, mais nous n'avons pas
+pu le faire dû au temps nécessaire de re-création du jeu de données et l'envoi
+sur le GPU distant. On note néanmoins que certains exemples sont plutôt bien prédits ;
+voir annexes.
 
 \section{Temps d'entraînement}
 
@@ -328,16 +343,6 @@ Il s'avère que les résultats ci-dessus peuvent être obtenus assez rapidement,
 seulement quelques \textit{epochs}. En fait, le taux d'erreur est de moins de 25\%
 à la fin du premier \textit{epoch}, puis stagne autour de 17-18\% après environ cinq
 \textit{epochs}.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Analyse}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Pistes d'amélioration}
-
-% TODO: dire qu'on n'a pas eu le temps de tester d'autres genres de data augmentation,
-% ni beaucoup de modeles à cause du temps d'entrainement long
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Protocole d'utilisation}
@@ -356,6 +361,66 @@ générer le jeu de données d'entraînement (après augmentation des données),
  la fonction \textit{get\_images\_from\_train\_label(X[i], y[i], channel)}, où \textit{X}
  et \textit{y} représentent les jeu de données traitées.
 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ \appendix
+
+ \chapter{Exemples de prédictions de dendrites}
+
+ \paragraph{a}
+
+ \begin{figure}[H]
+ \centering
+ \includegraphics[scale=0.35]{"2_truth"}
+ \caption{Vrais masques}
+ \end{figure}
+
+ \begin{figure}[H]
+ \centering
+ \includegraphics[scale=0.55]{"2_result"}
+ \caption{Prédiction}
+ \end{figure}
+
+ \paragraph{b}
+
+ \begin{figure}[H]
+ \centering
+ \includegraphics[scale=0.35]{"91_truth"}
+ \caption{Vrais masques}
+ \end{figure}
+
+ \begin{figure}[H]
+ \centering
+ \includegraphics[scale=0.65]{"91_result"}
+ \caption{Prédiction}
+ \end{figure}
+
+ \paragraph{c}
+
+ \begin{figure}[H]
+ \centering
+ \includegraphics[scale=0.55]{"397_truth"}
+ \caption{Vrais masques}
+ \end{figure}
+
+ \begin{figure}[H]
+ \centering
+ \includegraphics[scale=0.75]{"397_result"}
+ \caption{Prédiction}
+ \end{figure}
+
+ \paragraph{d}
+
+ \begin{figure}[H]
+ \centering
+ \includegraphics[scale=0.55]{"2_truth_axons"}
+ \caption{Vrais masques}
+ \end{figure}
+
+ \begin{figure}[H]
+ \centering
+ \includegraphics[scale=0.75]{"2_result_axons"}
+ \caption{Prédiction}
+ \end{figure}
 
 
 \end{document}
